@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "960829625220",
+    "firebase_url": "https://mtp-test-app-b33df.firebaseio.com",
+    "project_id": "mtp-test-app-b33df",
+    "storage_bucket": "mtp-test-app-b33df.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:960829625220:android:8b31915790ce4722",
+        "android_client_info": {
+          "package_name": "com.meawallet.mtp.test.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "960829625220-uru2ab7j1p16nf6qka4lkeld9viand6c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiwYU2UqCbwEdUky7n7cAouic7qkCUMZk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

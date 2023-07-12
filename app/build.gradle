@@ -1,0 +1,105 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.meawallet.mtp.sampleapp'
+    compileSdk rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        // TODO: Replace with your application id. Currently configured to work with Mea Simulator SDK.
+//        applicationId "com.meawallet.mtp.sampleapp"
+        applicationId "com.meawallet.mtp.test.app"
+
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    flavorDimensions  "mobileServices"
+
+    productFlavors {
+        hms {
+            dimension "mobileServices"
+
+            apply plugin: 'com.huawei.agconnect'
+        }
+
+        gms {
+            dimension "mobileServices"
+
+            apply plugin: 'com.google.gms.google-services'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+configurations {
+    gmsDebugImplementation {}
+    gmsReleaseImplementation {}
+    hmsDebugImplementation {}
+    hmsReleaseImplementation {}
+}
+
+// TODO: Configure MeaWallet repository in settings.gradle file
+
+dependencies {
+
+    // TODO: Set the desired MTP SDK version. If possible, use the latest.
+    def mtdSdkVersion = "4.3.7"
+
+    // Environment usually is configured as build flavour.
+    // For the sample purposes only the test environment is used.
+    def env = "test"
+
+    // TODO: Replace with your issuer name
+    def issuer = "mea-simulator"
+
+    def artifactName = "mtp-${issuer}-${env}"
+    def artifactHmsName = "mtp-${issuer}-hms-${env}"
+
+    // Dependencies if GMS supported SDK is used
+    gmsDebugImplementation "com.meawallet:${artifactName}:${mtdSdkVersion}-debug"
+    gmsReleaseImplementation "com.meawallet:${artifactName}:${mtdSdkVersion}"
+
+    // Dependencies if HMS supported SDK is used
+    hmsDebugImplementation "com.meawallet:${artifactHmsName}:${mtdSdkVersion}-debug"
+    hmsReleaseImplementation "com.meawallet:${artifactHmsName}:${mtdSdkVersion}"
+
+    hmsImplementation "com.huawei.hms:push:${rootProject.ext.pushKitVersion}"
+
+    implementation "com.google.firebase:firebase-messaging-ktx:${rootProject.ext.firebaseVersion}"
+    implementation "androidx.core:core-ktx:${rootProject.ext.coreKotlinVersion}"
+    implementation "androidx.appcompat:appcompat:${rootProject.ext.appcompatVersion}"
+    implementation "com.google.android.material:material:${rootProject.ext.materialVersion}"
+    implementation "androidx.constraintlayout:constraintlayout:${rootProject.ext.constraintLayoutVersion}"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:${rootProject.ext.archComponentsVersion}"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${rootProject.ext.archComponentsVersion}"
+    implementation "androidx.navigation:navigation-fragment-ktx:${rootProject.ext.navigationVersion}"
+    implementation "androidx.navigation:navigation-ui-ktx:${rootProject.ext.navigationVersion}"
+    implementation "androidx.biometric:biometric:${rootProject.ext.biometricVersion}"
+    testImplementation "junit:junit:${rootProject.ext.junitVersion}"
+    androidTestImplementation "androidx.test.ext:junit:${rootProject.ext.extJunitVersion}"
+    androidTestImplementation "androidx.test.espresso:espresso-core:${rootProject.ext.espressoCoreVersion}"
+}

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.payment.PaymentActivity">
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/payment_vertical_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="
+            payment_user_authenticated_title"/>
+
+    <TextView
+        android:id="@+id/payment_user_authenticated_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User auth: "
+        android:textSize="16sp"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/payment_vertical_barrier"/>
+
+    <TextView
+        android:id="@+id/payment_user_authenticated"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="false"
+        android:textAllCaps="true"
+        android:textSize="16sp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toTopOf="@id/payment_user_authenticated_title"
+        app:layout_constraintStart_toEndOf="@id/payment_user_authenticated_title"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/payment_card_image"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginHorizontal="32dp"
+        android:elevation="3dp"
+        android:visibility="visible"
+        app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="@color/teal_700"
+        app:layout_constraintDimensionRatio="1.59"
+        app:layout_constraintTop_toBottomOf="@id/payment_user_authenticated_title"/>
+
+    <TextView
+        android:id="@+id/payment_masked_pan"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:elevation="4dp"
+        android:gravity="center"
+        tools:text="****  ****  ****  ****"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        app:layout_constraintVertical_bias="0.6"
+        app:layout_constraintTop_toTopOf="@id/payment_card_image"
+        app:layout_constraintBottom_toBottomOf="@id/payment_card_image"
+        app:layout_constraintStart_toStartOf="@id/payment_card_image"
+        app:layout_constraintEnd_toEndOf="@id/payment_card_image"/>
+
+    <TextView
+        android:id="@+id/payment_valid_thru"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:elevation="4dp"
+        android:gravity="center"
+        tools:text="**/**"
+        android:textSize="14sp"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/payment_card_image"
+        app:layout_constraintStart_toStartOf="@id/payment_card_image" />
+
+    <TextView
+        android:id="@+id/payment_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:gravity="center"
+        tools:text="Tap to tap and payment start app a fact"
+        android:textSize="16sp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintTop_toBottomOf="@id/payment_card_image"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/payment_progress_indicator"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:visibility="invisible"
+        android:indeterminate="true"
+        android:elevation="8dp"
+        app:indicatorColor="@color/teal_200"
+        app:layout_constraintStart_toStartOf="@id/payment_card_image"
+        app:layout_constraintEnd_toEndOf="@id/payment_card_image"
+        app:layout_constraintTop_toTopOf="@id/payment_card_image"
+        app:layout_constraintBottom_toBottomOf="@id/payment_card_image" />
+
+    <View
+        android:id="@+id/payment_fail_ic"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:visibility="invisible"
+        tools:visibility="invisible"
+        android:elevation="8dp"
+        android:background="@drawable/ic_error_24dp"
+        app:layout_constraintStart_toStartOf="@id/payment_card_image"
+        app:layout_constraintEnd_toEndOf="@id/payment_card_image"
+        app:layout_constraintTop_toTopOf="@id/payment_card_image"
+        app:layout_constraintBottom_toBottomOf="@id/payment_card_image" />
+
+    <View
+        android:id="@+id/payment_completed_ic"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:visibility="invisible"
+        tools:visibility="invisible"
+        android:elevation="8dp"
+        android:background="@drawable/ic_check_24dp"
+        app:layout_constraintStart_toStartOf="@id/payment_card_image"
+        app:layout_constraintEnd_toEndOf="@id/payment_card_image"
+        app:layout_constraintTop_toTopOf="@id/payment_card_image"
+        app:layout_constraintBottom_toBottomOf="@id/payment_card_image" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/payment_close_button"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_margin="32dp"
+        android:text="@string/payment_close_activity"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

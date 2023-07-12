@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/card_complete_digitization"
+        android:title="@string/card_complete"/>
+    <item
+        android:id="@+id/card_mark_for_delete"
+        android:title="@string/card_mark_delete"/>
+
+    <item
+        android:id="@+id/card_set_as_default"
+        android:title="@string/card_set_default"/>
+    <item
+        android:id="@+id/card_unset_as_default"
+        android:title="@string/card_unset_default"/>
+    <item
+        android:id="@+id/card_select_for_contactless"
+        android:title="@string/card_select_for_contactless"/>
+    <item
+        android:id="@+id/card_deselect_for_contactless"
+        android:title="@string/card_deselect_for_contactless"/>
+    <item
+        android:id="@+id/card_replenish_payment_tokens"
+        android:title="@string/card_replenish_payment_tokens"/>
+
+    <item
+        android:id="@+id/card_delete_payment_tokens"
+        android:title="@string/card_delete_payment_tokens"/>
+
+<!--    <item-->
+<!--        android:id="@+id/navigation_notifications"-->
+<!--        android:icon="@drawable/ic_settings_black_24dp"-->
+<!--        android:title="@string/title_status"/>-->
+
+</menu>

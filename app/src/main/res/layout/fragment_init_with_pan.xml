@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginVertical="4dp"
+    tools:context=".ui.addcard.InitWithPanFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp"
+        android:weightSum="9">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/card_pan_container"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:hint="Card PAN"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="7">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/card_pan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="5286407286475208"
+                android:inputType="number"
+                android:digits="0123456789"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/card_pan_get"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:text="get"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp"
+        android:weightSum="9">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/card_holder_name_container"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:hint="Cardholder name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="7">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/card_holder_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Mingo Bingo" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/card_holder_name_get"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:text="get"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="Month:"/>
+
+        <NumberPicker
+            android:id="@+id/card_month"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginEnd="20dp"
+            android:text="Exp Month"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="Year:"/>
+
+        <NumberPicker
+            android:id="@+id/card_year"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="Exp Year"/>
+    </LinearLayout>
+
+</LinearLayout>

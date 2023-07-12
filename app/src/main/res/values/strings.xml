@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">MTP Sample App</string>
+    <string name="apduServiceDescription">MTP Sample App</string>
+    <string name="aidGroupDescription">MTP Sample App</string>
+
+    <string name="title_payment_activity">Payment</string>
+
+    <string name="title_cards">Cards</string>
+    <string name="title_status">Status</string>
+    <string name="title_add_card">Digitize Card</string>
+
+    <string name="menu_open_payment_manually">Open payment activity</string>
+    <string name="menu_prompt_authentication">Prompt authentication</string>
+
+    <string name="card_complete">Complete digitization</string>
+    <string name="card_mark_delete">Mark for deletion</string>
+    <string name="card_set_default">Set as default</string>
+    <string name="card_unset_default">Unset as default</string>
+    <string name="card_select_for_contactless">Select for contactless</string>
+    <string name="card_deselect_for_contactless">Deselect for contactless</string>
+    <string name="card_replenish_payment_tokens">Replenish tokens</string>
+    <string name="card_delete_payment_tokens">Delete tokens</string>
+
+    <string name="alert_ok">Ok</string>
+    <string name="alert_success">Success</string>
+    <string name="alert_terms_conditions_title">Terms &amp; Conditions</string>
+    <string name="alert_error">Error</string>
+
+    <string name="card_action_title">Card %1$s</string>
+    <string name="card_action_failure_title">Card %1$s failure</string>
+    <string name="card_action_failure_message">Card with id %1$s %2$s failed with error: %3$d</string>
+    <string name="card_action_message">Card with id %1$s %2$s successful.</string>
+    <string name="broadcasts">Broadcasts</string>
+    <string name="card_listeners">Card listeners</string>
+
+    <string name="transaction">Transaction</string>
+    <string name="authentication_required">Authentication required</string>
+    <string name="show_device_unlock">Show Device Unlock</string>
+
+    <string name="payment_close_activity">Close payment</string>
+
+    <string name="add_card_tc_accept_text">I accept <u>Terms &amp; Conditions</u></string>
+
+</resources>

@@ -1,0 +1,32 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+
+        maven {url 'https://developer.huawei.com/repo/'} // Only if HMS build is required
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://developer.huawei.com/repo/'} // Only if HMS build is required
+        maven {
+            // TODO: Replace your nexus credentials and group name
+            def issuerRepoGroup = "mea-guest-group"
+            def user = "mea-guest-user"
+            def pass = "t35tMeN0W:)"
+
+            url "https://nexus.ext.meawallet.com/repository/${issuerRepoGroup}/"
+
+            credentials {
+                username "${user}"
+                password "${pass}"
+            }
+        }
+    }
+}
+rootProject.name = "MTP Sample App"
+include ':app'
