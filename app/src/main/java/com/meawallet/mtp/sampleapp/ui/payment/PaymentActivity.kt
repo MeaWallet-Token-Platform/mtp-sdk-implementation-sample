@@ -3,6 +3,7 @@ package com.meawallet.mtp.sampleapp.ui.payment
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.app.KeyguardManager.KeyguardDismissCallback
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
@@ -26,6 +28,7 @@ import com.meawallet.mtp.sampleapp.helpers.AlertDialogHelper
 import com.meawallet.mtp.sampleapp.helpers.ErrorHelper
 import com.meawallet.mtp.sampleapp.intents.*
 import com.meawallet.mtp.sampleapp.listeners.AlertDialogListener
+import com.meawallet.mtp.sampleapp.utils.DeviceUtils
 import com.meawallet.mtp.sampleapp.utils.getBackgroundImage
 import java.util.concurrent.Executor
 
@@ -33,6 +36,8 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
     companion object {
         private val TAG = PaymentActivity::class.java.simpleName
+
+        private var isOverLockScreenRequired = false
     }
 
     private var aheadOfTimeAuthentication = false
@@ -124,6 +129,8 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
         MeaTokenPlatform.registerDeviceUnlockReceiver()
         paymentViewModel.updateIsUserAuthenticated(this)
+
+        setOverLockScreenFlags(isOverLockScreenRequired)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -213,36 +220,52 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
                 processCardSelectedForPayment()
             }
 
-            PaymentIntentActionsEnum.INTENT_ACTION_AUTHENTICATION_REQUIRED -> AlertDialogHelper.showAuthRequiredDialog(
-                this,
-                String.format(
-                    "\"Authentication required\" %s event received for card: %s, data: %s",
-                    eventSource,
-                    cardId,
-                    data.toString()
+            PaymentIntentActionsEnum.INTENT_ACTION_AUTHENTICATION_REQUIRED -> {
+
+                checkOverLockScreenRequired()
+
+                AlertDialogHelper.showAuthRequiredDialog(
+                    this,
+                    String.format(
+                        "\"Authentication required\" %s event received for card: %s, data: %s",
+                        eventSource,
+                        cardId,
+                        data.toString()
+                    ),
+                    DialogInterface.OnClickListener { _, whichButton ->
+                        clearOverLockScreenFlags()
+
+                        // Exit dialog if user dismisses requirement for authentication
+                        if (whichButton != DialogInterface.BUTTON_POSITIVE) {
+                            return@OnClickListener
+                        }
+
+                        try {
+                            var selectedCard = MeaTokenPlatform.getCardSelectedForContactlessPayment()
+                            if (selectedCard == null || selectedCard.id != cardId) {
+                                selectedCard = MeaTokenPlatform.getDefaultCardForContactlessPayments()
+                            }
+
+                            if (selectedCard != null && selectedCard.id == cardId) {
+
+                                cardInAction = selectedCard
+
+                                authenticateCardholder(false)
+                            } else {
+                                Log.w(
+                                    TAG,
+                                    "Authentication required event received for card which is not selected or default."
+                                )
+                            }
+
+                        } catch (exception: MeaCheckedException) {
+                            ErrorHelper.handleMeaCheckedException(this, exception)
+                        }
+                    },
+                    DialogInterface.OnDismissListener {
+                        clearOverLockScreenFlags()
+                    }
                 )
-
-            ) { _, _ ->
-                try {
-                    var selectedCard = MeaTokenPlatform.getCardSelectedForContactlessPayment()
-                    if (selectedCard == null || selectedCard.id != cardId) {
-                        selectedCard = MeaTokenPlatform.getDefaultCardForContactlessPayments()
-                    }
-
-                    if (selectedCard != null && selectedCard.id == cardId) {
-
-                        cardInAction = selectedCard
-
-                        authenticateCardholder(false)
-                    } else {
-                        Log.w(
-                            TAG,
-                            "Authentication required event received for card which is not selected or default."
-                        )
-                    }
-                } catch (exception: MeaCheckedException) {
-                    ErrorHelper.handleMeaCheckedException(this, exception)
-                }
             }
 
             PaymentIntentActionsEnum.INTENT_ACTION_TRANSACTION_SUBMITTED -> {
@@ -282,7 +305,6 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
                         }
                     }
                 )
-
             }
 
             PaymentIntentActionsEnum.INTENT_ACTION_TRANSACTION_STARTED -> {
@@ -454,6 +476,65 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         AlertDialogHelper.showErrorMessageDialog(this@PaymentActivity,"Device unlock authentication failed or canceled.")
 
         paymentViewModel.setPaymentState(PaymentActivityState.TransactionFailed)
+    }
+
+    // Add necessary flags to show auth required info over the lock screen
+    private fun setOverLockScreenFlags(startOverLockScreen: Boolean) {
+        Log.d(TAG, "setOverLockScreenFlags($startOverLockScreen)")
+
+        if (startOverLockScreen) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(true)
+                setTurnScreenOn(true)
+            } else {
+                @Suppress("DEPRECATION")
+                window.addFlags(
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                )
+            }
+
+            // these flags are set regardless the version
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+            )
+        }
+    }
+
+    private fun clearOverLockScreenFlags() {
+        Log.d(TAG, "clearOverLockScreenFlags($isOverLockScreenRequired)")
+
+        if (isOverLockScreenRequired) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(false)
+                setTurnScreenOn(false)
+            } else {
+                @Suppress("DEPRECATION")
+                window.clearFlags(
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                )
+            }
+
+            // these flags are set regardless the version
+            window.clearFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+            )
+        }
+
+        isOverLockScreenRequired = false
+    }
+
+    private fun checkOverLockScreenRequired() {
+        Log.d(TAG, "checkOverLockScreenRequired(${DeviceUtils.isDeviceLocked(this)})")
+
+        if (DeviceUtils.isDeviceLocked(this)) {
+            isOverLockScreenRequired = true
+        }
     }
 
 
