@@ -67,7 +67,7 @@ configurations {
 dependencies {
 
     // TODO: Set the desired MTP SDK version. If possible, use the latest.
-    def mtdSdkVersion = "4.3.7"
+    def mtdSdkVersion = "4.3.8"
 
     // Environment usually is configured as build flavour.
     // For the sample purposes only the test environment is used.
