@@ -10,6 +10,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.meawallet.mtp.MeaInitializeDigitizationParameters
 import com.meawallet.mtp.sampleapp.R
+import java.util.Calendar
 
 class InitWithPanFragment : DigitizationParamProviderFragment() {
 
@@ -54,9 +55,11 @@ class InitWithPanFragment : DigitizationParamProviderFragment() {
 
         cardMonthInput.minValue = 1
         cardMonthInput.maxValue = 12
+        cardMonthInput.value = getCurrentMonth()
 
-        cardYearInput.minValue = 23
-        cardYearInput.maxValue = 32
+        cardYearInput.minValue = getCurrentYear()
+        cardYearInput.maxValue = getCurrentYear() + 5
+        cardYearInput.value = getCurrentYear() + 2
 
         cardPanGetBtn.setOnClickListener {
             cardPanInput.setText("5286407286475208")
@@ -65,6 +68,14 @@ class InitWithPanFragment : DigitizationParamProviderFragment() {
         cardHolderNameGetBtn.setOnClickListener {
             cardHolderNameInput.setText("Mingo Bingo")
         }
+    }
+
+    private fun getCurrentYear(): Int {
+        return Calendar.getInstance().get(Calendar.YEAR) % 100 // get last 2 digits of a year
+    }
+
+    private fun getCurrentMonth(): Int {
+        return Calendar.getInstance().get(Calendar.MONTH) + 1  // month count starts at 0
     }
 
     override fun isInputValid(): Boolean {
