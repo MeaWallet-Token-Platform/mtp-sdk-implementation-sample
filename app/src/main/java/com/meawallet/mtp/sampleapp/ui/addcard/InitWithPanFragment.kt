@@ -10,6 +10,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.meawallet.mtp.MeaInitializeDigitizationParameters
 import com.meawallet.mtp.sampleapp.R
+import com.meawallet.mtp.sampleapp.utils.RandomPanBuilder
 import java.util.Calendar
 
 class InitWithPanFragment : DigitizationParamProviderFragment() {
@@ -62,7 +63,7 @@ class InitWithPanFragment : DigitizationParamProviderFragment() {
         cardYearInput.value = getCurrentYear() + 2
 
         cardPanGetBtn.setOnClickListener {
-            cardPanInput.setText("5286407286475208")
+            cardPanInput.setText(RandomPanBuilder.getRandomPan())
         }
 
         cardHolderNameGetBtn.setOnClickListener {
