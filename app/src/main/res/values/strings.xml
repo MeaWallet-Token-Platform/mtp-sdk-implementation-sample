@@ -21,6 +21,7 @@
     <string name="card_replenish_payment_tokens">Replenish tokens</string>
     <string name="card_delete_payment_tokens">Delete tokens</string>
 
+    <string name="alert_dismiss">Dismiss</string>
     <string name="alert_ok">Ok</string>
     <string name="alert_success">Success</string>
     <string name="alert_terms_conditions_title">Terms &amp; Conditions</string>

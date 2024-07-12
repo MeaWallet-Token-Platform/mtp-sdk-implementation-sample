@@ -84,15 +84,17 @@ object AlertDialogHelper {
     fun showAuthRequiredDialog(
         activity: Activity,
         message: String?,
-        showDeviceUnlockListener: DialogInterface.OnClickListener?
+        showDeviceUnlockListener: DialogInterface.OnClickListener?,
+        unlockDismissListener: DialogInterface.OnDismissListener?
     ) {
         mMainThreadExecutor.execute {
             val builder =
                 AlertDialog.Builder(activity)
 
             builder.setMessage(message)
-            builder.setPositiveButton(R.string.alert_ok, null)
-            builder.setNeutralButton(R.string.show_device_unlock, showDeviceUnlockListener)
+            builder.setOnDismissListener(unlockDismissListener)
+            builder.setNeutralButton(R.string.alert_dismiss, showDeviceUnlockListener)
+            builder.setPositiveButton(R.string.show_device_unlock, showDeviceUnlockListener)
             val currentDialog = builder.create()
 
             showCurrentDialog(activity, currentDialog)
