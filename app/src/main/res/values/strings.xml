@@ -36,10 +36,11 @@
 
     <string name="transaction">Transaction</string>
     <string name="authentication_required">Authentication required</string>
-    <string name="show_device_unlock">Show Device Unlock</string>
+    <string name="show_device_unlock">Show Step Up Auth</string>
 
     <string name="payment_close_activity">Close payment</string>
 
     <string name="add_card_tc_accept_text">I accept <u>Terms &amp; Conditions</u></string>
+    <string name="title_activity_auth">Step Up Authentication</string>
 
 </resources>

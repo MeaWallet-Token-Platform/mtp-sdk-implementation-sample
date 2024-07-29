@@ -13,6 +13,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -28,9 +32,11 @@ import com.meawallet.mtp.sampleapp.helpers.AlertDialogHelper
 import com.meawallet.mtp.sampleapp.helpers.ErrorHelper
 import com.meawallet.mtp.sampleapp.intents.*
 import com.meawallet.mtp.sampleapp.listeners.AlertDialogListener
+import com.meawallet.mtp.sampleapp.ui.auth.AuthActivity
 import com.meawallet.mtp.sampleapp.utils.DeviceUtils
 import com.meawallet.mtp.sampleapp.utils.getBackgroundImage
 import java.util.concurrent.Executor
+
 
 class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
@@ -59,6 +65,23 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
     private var paymentActivityState: PaymentActivityState? = null
     private var cardInAction: MeaCard? = null
+
+    private var authUser : ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback {
+                result: ActivityResult ->
+            if(result.resultCode == RESULT_OK) {
+                val data = result.data
+                val authSuccessful = data?.getBooleanExtra(AuthActivity.AUTH_SUCCESSFUL, false) ?: false
+
+                if (authSuccessful) {
+                    processSuccessfulAuth()
+                } else {
+                    processFailedAuth()
+                }
+            } else {
+                processFailedAuth()
+            }
+        })
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -171,7 +194,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         paymentCompletedIc = findViewById(R.id.payment_completed_ic)
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
         handleIntent(intent)
@@ -451,9 +474,9 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
         try {
 
-            //TODO: Super important to add this line. It the actual way of
-            // informing SDK that device authentication has succeeded
-            MeaTokenPlatform.authenticateWithDeviceUnlock()
+            //TODO Step Up Auth: Super important to add this line. It is the actual way of
+            // informing SDK that authentication with the issuer app has succeeded
+            MeaTokenPlatform.StepUpAuth.stepUpAuthenticated()
 
         } catch (exception: MeaCheckedException) {
             Log.e(TAG,"Failed to authenticate with device unlock.", exception)
@@ -473,7 +496,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
         stopContactlessTransactionForSelectedCard()
         removeAheadOfTimeAuthentication()
-        AlertDialogHelper.showErrorMessageDialog(this@PaymentActivity,"Device unlock authentication failed or canceled.")
+        AlertDialogHelper.showErrorMessageDialog(this@PaymentActivity,"Step up authentication failed or canceled.")
 
         paymentViewModel.setPaymentState(PaymentActivityState.TransactionFailed)
     }
@@ -537,6 +560,11 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         }
     }
 
+    private fun startStepUpAuthActivity() {
+        val startAuthIntent = Intent(this@PaymentActivity, AuthActivity::class.java)
+        authUser.launch(startAuthIntent)
+    }
+
 
     override fun onFailure(error: MeaError) {
         Log.e(TAG,"MeaAuthenticationListener.onFailure()", Exception(error.message))
@@ -556,10 +584,19 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         AlertDialogHelper.showErrorMessageDialog(this,"Card PIN not implemented")
     }
 
+    // This method is called in both cases - when the device unlock is required (in case of
+    // Device Unlock) and when the app auth is required (in the case of Step Up Auth configuration)
     override fun onDeviceUnlockRequired() {
         Log.d(TAG, "onDeviceUnlockRequired()")
 
-        showDeviceUnlockScreen()
+        // TODO Step Up Auth: put your app auth method here.
+
+        // You can use the device unlock and notify SDK in case of success with
+        // MeaTokenPlatform.StepUpAuth.stepUpAuthenticated()
+        // showDeviceUnlockScreen()
+
+        // Or you can use a custom auth provider from your app
+        startStepUpAuthActivity()
     }
 
     override fun onFingerprintRequired() {

@@ -67,14 +67,14 @@ configurations {
 dependencies {
 
     // TODO: Set the desired MTP SDK version. If possible, use the latest.
-    def mtdSdkVersion = "4.3.8"
+    def mtdSdkVersion = "4.4.0"
 
     // Environment usually is configured as build flavour.
     // For the sample purposes only the test environment is used.
     def env = "test"
 
     // TODO: Replace with your issuer name
-    def issuer = "mea-simulator"
+    def issuer = "mea-simulator-stepup"
 
     def artifactName = "mtp-${issuer}-${env}"
     def artifactHmsName = "mtp-${issuer}-hms-${env}"
