@@ -233,11 +233,13 @@ class CardListAdapter : RecyclerView.Adapter<CardListAdapter.ViewHolder>() {
         }
 
         private fun setAsDefaultForContactless(card: MeaCard) {
+            card.deselectForContactlessPayment()
             card.setAsDefaultForContactlessPayments()
             updateCards(MeaTokenPlatform.getCards())
         }
 
         private fun unsetAsDefaultForContactless(card: MeaCard) {
+            card.deselectForContactlessPayment()
             card.unsetAsDefaultForContactlessPayments()
             updateCards(MeaTokenPlatform.getCards())
         }
