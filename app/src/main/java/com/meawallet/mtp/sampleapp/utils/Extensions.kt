@@ -1,6 +1,7 @@
 package com.meawallet.mtp.sampleapp.utils
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Base64
@@ -75,4 +76,4 @@ fun MeaCard.isSelectedForPayment(): Boolean {
     return this.id == MeaTokenPlatform.getCardSelectedForContactlessPayment()?.id
 }
 
-
+fun AssetManager.readAssetsFile(fileName : String): String = open(fileName).bufferedReader().use{it.readText()}

@@ -276,7 +276,8 @@ class AddCardActivity : AppCompatActivity() {
     private fun setupDigitizationMethodDropdown() {
         val digitizationMethods = arrayListOf(
             DigitizationMethodEnum.PAN.value,
-            DigitizationMethodEnum.CARD_ID.value) // "Encrypted PAN", "Receipt", "E2E encrypted data")
+            DigitizationMethodEnum.CARD_ID.value,
+            DigitizationMethodEnum.ENCRYPTED_PAN.value) // "Receipt", "E2E encrypted data")
         val dmAdapter: ArrayAdapter<String> = ArrayAdapter(this, R.layout.dropdown_menu_item, digitizationMethods)
 
         digiMethodDropdown.setAdapter(dmAdapter)
