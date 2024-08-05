@@ -99,7 +99,6 @@
             android:layout_marginBottom="8dp"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:enabled="false"
             android:text="build dynamic data" />
 
     </LinearLayout>
