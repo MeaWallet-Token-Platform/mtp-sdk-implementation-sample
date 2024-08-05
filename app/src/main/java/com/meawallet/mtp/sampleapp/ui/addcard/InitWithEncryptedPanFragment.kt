@@ -35,6 +35,7 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
     private lateinit var initialVectorInput: TextInputEditText
     private lateinit var initialVectorInputContainer: TextInputLayout
     private lateinit var staticDataGetBtn: MaterialButton
+    private lateinit var fileDataLoadBtn: MaterialButton
     private lateinit var dynamicDataGetBtn: MaterialButton
 
     private lateinit var initializeViewSet: MutableSet<View>
@@ -61,6 +62,23 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
             }
         })
 
+    private val encryptedDataFilePickerResult : ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback {
+                result: ActivityResult ->
+            if(result.resultCode == RESULT_OK) {
+                val filePath = result.data?.data
+
+                val encryptedData = filePath?.let { path -> context?.let {
+                    context ->  EncryptedDataReader.readEncryptedDataFromContent(context, path)
+                } }
+
+                if (isEncryptedDataValid(encryptedData)) {
+                    fillEncryptedData(encryptedData!!)
+                } else {
+                    showDataLoadFailedDialog()
+                }
+            }
+        })
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,16 +101,21 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
         initialVectorInputContainer = fragmentRoot.findViewById(R.id.initial_vector_container)
 
         staticDataGetBtn = fragmentRoot.findViewById(R.id.static_data_get)
+        fileDataLoadBtn = fragmentRoot.findViewById(R.id.data_load_from_file)
         dynamicDataGetBtn = fragmentRoot.findViewById(R.id.dynamic_data_get)
 
         initializeViewSet =
             mutableSetOf(encryptedCardDataInput, encryptedCardDataInputContainer,
                 publicKeyFingerprintInput, publicKeyFingerprintInputContainer, encryptedKeyInput,
                 encryptedKeyInputContainer, initialVectorInput, initialVectorInputContainer,
-                staticDataGetBtn, dynamicDataGetBtn)
+                staticDataGetBtn, fileDataLoadBtn, dynamicDataGetBtn)
 
         staticDataGetBtn.setOnClickListener {
             readAndFillStaticData()
+        }
+
+        fileDataLoadBtn.setOnClickListener {
+            chooseEncryptedDataFile()
         }
 
         dynamicDataGetBtn.setOnClickListener {
@@ -102,7 +125,7 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
     }
 
     private fun readAndFillStaticData(){
-        val encryptedData = context?.let { EncryptedDataReader.readEncryptedData(it) }
+        val encryptedData = context?.let { EncryptedDataReader.readEncryptedDataFromAssets(it) }
 
         encryptedData?.let { fillEncryptedData(it) }
     }
@@ -110,6 +133,14 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
     private fun generateAndFillDynamicData(){
         val getEncryptedDataIntent = Intent(activity, EncryptedDataGeneratorActivity::class.java)
         encryptedCardDataResult.launch(getEncryptedDataIntent)
+    }
+
+    private fun chooseEncryptedDataFile() {
+        val chooseFileIntent = Intent()
+            .setType("application/json")
+            .setAction(Intent.ACTION_GET_CONTENT)
+
+        encryptedDataFilePickerResult.launch(chooseFileIntent)
     }
 
     private fun fillEncryptedData(encryptedData: EncryptedData) {
@@ -122,6 +153,18 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
     private fun showDataGenerationFailedDialog() {
         activity?.let {
             AlertDialogHelper.showErrorMessageDialog(it, "Encrypted data generation failed") }
+    }
+
+    private fun showDataLoadFailedDialog() {
+        activity?.let {
+            AlertDialogHelper.showErrorMessageDialog(it, "Encrypted data loading failed") }
+    }
+
+    private fun isEncryptedDataValid(data: EncryptedData?): Boolean {
+        return data?.encryptedCardData?.isNotEmpty() ?: false
+                && data?.publicKeyFingerprint?.isNotEmpty() ?: false
+                && data?.encryptedKey?.isNotEmpty() ?: false
+                && data?.iv?.isNotEmpty() ?: false
     }
 
     override fun isInputValid(): Boolean {

@@ -94,11 +94,20 @@
             android:text="get static data" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/data_load_from_file"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginBottom="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="load from file" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/dynamic_data_get"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_marginBottom="8dp"
             android:layout_width="match_parent"
             android:layout_height="55dp"
+            android:visibility="gone"
             android:text="build dynamic data" />
 
     </LinearLayout>

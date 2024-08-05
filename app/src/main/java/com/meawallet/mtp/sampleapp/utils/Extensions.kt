@@ -1,9 +1,11 @@
 package com.meawallet.mtp.sampleapp.utils
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import com.meawallet.mtp.*
@@ -77,3 +79,6 @@ fun MeaCard.isSelectedForPayment(): Boolean {
 }
 
 fun AssetManager.readAssetsFile(fileName : String): String = open(fileName).bufferedReader().use{it.readText()}
+
+fun ContentResolver.readContentsFile(path : Uri): String? =
+    openInputStream(path).use {it?.bufferedReader(Charsets.UTF_8).use { bf -> bf?.readText() } }
