@@ -35,32 +35,9 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
     private lateinit var initialVectorInput: TextInputEditText
     private lateinit var initialVectorInputContainer: TextInputLayout
     private lateinit var staticDataGetBtn: MaterialButton
-    private lateinit var fileDataLoadBtn: MaterialButton
-    private lateinit var dynamicDataGetBtn: MaterialButton
+    private lateinit var dataFromFileLoadBtn: MaterialButton
 
     private lateinit var initializeViewSet: MutableSet<View>
-
-    private val encryptedCardDataResult : ActivityResultLauncher<Intent> =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback {
-                result: ActivityResult ->
-            if(result.resultCode == RESULT_OK) {
-                val data = result.data
-
-                val encryptedCardData = data?.getStringExtra(EncryptedDataGeneratorActivity.ENCRYPTED_CARD_DATA) ?: ""
-                val publicKeyFingerprint = data?.getStringExtra(EncryptedDataGeneratorActivity.PUBLIC_KEY_FINGERPRINT) ?: ""
-                val encryptedKey = data?.getStringExtra(EncryptedDataGeneratorActivity.ENCRYPTED_KEY) ?: ""
-                val initialVector = data?.getStringExtra(EncryptedDataGeneratorActivity.IV) ?: ""
-
-                if (encryptedCardData.isNotEmpty()) {  // if data not empty
-                    val encryptedData = EncryptedData(encryptedCardData, publicKeyFingerprint, encryptedKey, initialVector)
-                    fillEncryptedData(encryptedData)
-                } else {
-                    showDataGenerationFailedDialog()  // don't do nothing, display popup
-                }
-            } else {
-                showDataGenerationFailedDialog()  // don't do nothing, display popup
-            }
-        })
 
     private val encryptedDataFilePickerResult : ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback {
@@ -101,38 +78,27 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
         initialVectorInputContainer = fragmentRoot.findViewById(R.id.initial_vector_container)
 
         staticDataGetBtn = fragmentRoot.findViewById(R.id.static_data_get)
-        fileDataLoadBtn = fragmentRoot.findViewById(R.id.data_load_from_file)
-        dynamicDataGetBtn = fragmentRoot.findViewById(R.id.dynamic_data_get)
+        dataFromFileLoadBtn = fragmentRoot.findViewById(R.id.data_load_from_file)
 
         initializeViewSet =
             mutableSetOf(encryptedCardDataInput, encryptedCardDataInputContainer,
                 publicKeyFingerprintInput, publicKeyFingerprintInputContainer, encryptedKeyInput,
                 encryptedKeyInputContainer, initialVectorInput, initialVectorInputContainer,
-                staticDataGetBtn, fileDataLoadBtn, dynamicDataGetBtn)
+                staticDataGetBtn, dataFromFileLoadBtn)
 
         staticDataGetBtn.setOnClickListener {
             readAndFillStaticData()
         }
 
-        fileDataLoadBtn.setOnClickListener {
+        dataFromFileLoadBtn.setOnClickListener {
             chooseEncryptedDataFile()
         }
-
-        dynamicDataGetBtn.setOnClickListener {
-            generateAndFillDynamicData()
-        }
-
     }
 
     private fun readAndFillStaticData(){
         val encryptedData = context?.let { EncryptedDataReader.readEncryptedDataFromAssets(it) }
 
         encryptedData?.let { fillEncryptedData(it) }
-    }
-
-    private fun generateAndFillDynamicData(){
-        val getEncryptedDataIntent = Intent(activity, EncryptedDataGeneratorActivity::class.java)
-        encryptedCardDataResult.launch(getEncryptedDataIntent)
     }
 
     private fun chooseEncryptedDataFile() {
@@ -148,11 +114,6 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
         publicKeyFingerprintInput.setText(encryptedData.publicKeyFingerprint)
         encryptedKeyInput.setText(encryptedData.encryptedKey)
         initialVectorInput.setText(encryptedData.iv)
-    }
-
-    private fun showDataGenerationFailedDialog() {
-        activity?.let {
-            AlertDialogHelper.showErrorMessageDialog(it, "Encrypted data generation failed") }
     }
 
     private fun showDataLoadFailedDialog() {
