@@ -13,12 +13,11 @@
         android:theme="@style/Theme.MTPSampleApp"
         tools:replace="android:allowBackup,android:fullBackupContent"
         tools:targetApi="31">
-
         <activity
             android:name=".ui.payment.PaymentActivity"
-            android:launchMode="singleTask"
+            android:exported="false"
             android:label="@string/title_payment_activity"
-            android:exported="false" />
+            android:launchMode="singleTask" />
         <activity
             android:name=".ui.addcard.AddCardActivity"
             android:exported="false"
@@ -35,7 +34,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
