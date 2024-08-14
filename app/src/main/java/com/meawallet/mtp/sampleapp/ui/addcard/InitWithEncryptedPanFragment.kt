@@ -23,7 +23,11 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
 
     companion object {
 
-        val instance: InitWithEncryptedPanFragment by lazy { InitWithEncryptedPanFragment() }
+        // a new instance is needed every time because registerForActivityResult is valid for only
+        // one launch and is created only when fragment is created
+        fun getNewInstance(): InitWithEncryptedPanFragment {
+            return InitWithEncryptedPanFragment()
+        }
     }
 
     private lateinit var encryptedCardDataInput: TextInputEditText
