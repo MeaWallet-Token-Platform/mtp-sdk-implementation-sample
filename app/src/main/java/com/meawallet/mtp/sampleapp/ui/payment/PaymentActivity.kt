@@ -173,11 +173,6 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     }
 
     private fun inflateAndSetupViews() {
-        val isAuth = findViewById<TextView>(R.id.payment_user_authenticated)
-        paymentViewModel.isUserAuthenticated(this).observe(this) {
-            isAuth.text = it.toString()
-        }
-
         closeButton = findViewById(R.id.payment_close_button)
         closeButton.setOnClickListener {
             stopContactlessTransactionForSelectedCard()
@@ -665,5 +660,4 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
             }
         }
     }
-
 }

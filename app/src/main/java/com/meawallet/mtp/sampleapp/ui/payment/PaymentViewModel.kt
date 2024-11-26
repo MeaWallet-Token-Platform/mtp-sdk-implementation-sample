@@ -30,7 +30,7 @@ class PaymentViewModel : ViewModel() {
     }
     fun updateIsUserAuthenticated(context: Context) {
         checkPlatformInitialized(context)
-        _isUserAuthenticated.setValue(MeaTokenPlatform.CdCvm.isCardholderAuthenticated())
+        _isUserAuthenticated.setValue(MeaTokenPlatform.StepUpAuth.isStepUpAuthenticated())
     }
     fun isUserAuthenticated(context: Context): LiveData<Boolean> {
         updateIsUserAuthenticated(context)

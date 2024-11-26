@@ -6,38 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.payment.PaymentActivity">
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/payment_vertical_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        app:barrierDirection="end"
-        app:constraint_referenced_ids="
-            payment_user_authenticated_title"/>
-
-    <TextView
-        android:id="@+id/payment_user_authenticated_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="User auth: "
-        android:textSize="16sp"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/payment_vertical_barrier"/>
-
-    <TextView
-        android:id="@+id/payment_user_authenticated"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        tools:text="false"
-        android:textAllCaps="true"
-        android:textSize="16sp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintTop_toTopOf="@id/payment_user_authenticated_title"
-        app:layout_constraintStart_toEndOf="@id/payment_user_authenticated_title"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/payment_card_image"
         android:layout_width="match_parent"
@@ -49,7 +17,7 @@
         app:cardCornerRadius="8dp"
         app:cardBackgroundColor="@color/teal_700"
         app:layout_constraintDimensionRatio="1.59"
-        app:layout_constraintTop_toBottomOf="@id/payment_user_authenticated_title"/>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/payment_masked_pan"
