@@ -27,7 +27,7 @@ android {
         }
     }
 
-    flavorDimensions  "mobileServices"
+    flavorDimensions = ["mobileServices"]
 
     productFlavors {
         hms {
