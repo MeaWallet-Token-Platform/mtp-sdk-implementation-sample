@@ -50,6 +50,8 @@ class CardsFragment : Fragment() {
 
         MeaTokenPlatform.setCardReplenishListener(object : MeaCardReplenishListener {
             override fun onReplenishCompleted(card: MeaCard, numberOfTokens: Int) {
+                Log.i(TAG,"onReplenishCompleted(). Card (cardId = ${card.id}) token count: $numberOfTokens Listener object: ${this.hashCode()}")
+
                 val adapter = cardListRv.adapter as CardListAdapter
                 adapter.updateCard(card)
             }
