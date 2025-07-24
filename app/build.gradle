@@ -24,6 +24,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
 
@@ -67,7 +68,7 @@ configurations {
 dependencies {
 
     // TODO: Set the desired MTP SDK version. If possible, use the latest.
-    def mtdSdkVersion = "4.3.8"
+    def mtdSdkVersion = "4.3.10"
 
     // Environment usually is configured as build flavour.
     // For the sample purposes only the test environment is used.
