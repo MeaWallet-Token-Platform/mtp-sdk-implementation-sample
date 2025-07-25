@@ -17,9 +17,9 @@ object PushServiceInstanceManager : IPushServiceInstanceManager {
 
     init {
         tokenDataMerger.addSource(MyFcmListenerService.getLastReceivedToken()
-        ) { value -> tokenDataMerger.postValue(value) }
+        ) { value -> value?.let { tokenDataMerger.postValue(it) } }
 
-        tokenDataMerger.addSource(localTokenKeeper) { value -> tokenDataMerger.postValue(value) }
+        tokenDataMerger.addSource(localTokenKeeper) { value -> value?.let { tokenDataMerger.postValue(it) } }
     }
 
     override fun getIdToken(context: Context, onResultListener: PushServiceInstanceIdGetListener) {
