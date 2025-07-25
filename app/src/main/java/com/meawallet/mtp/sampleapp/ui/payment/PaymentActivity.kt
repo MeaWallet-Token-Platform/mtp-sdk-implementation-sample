@@ -3,8 +3,11 @@ package com.meawallet.mtp.sampleapp.ui.payment
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.app.KeyguardManager.KeyguardDismissCallback
+import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
+import android.nfc.NfcAdapter
+import android.nfc.cardemulation.CardEmulation
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -21,13 +24,24 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import com.meawallet.mtp.*
+import com.meawallet.mtp.MeaAuthenticationListener
+import com.meawallet.mtp.MeaCard
+import com.meawallet.mtp.MeaCheckedException
+import com.meawallet.mtp.MeaContactlessTransactionData
+import com.meawallet.mtp.MeaError
+import com.meawallet.mtp.MeaHceService
+import com.meawallet.mtp.MeaTokenPlatform
 import com.meawallet.mtp.sampleapp.R
 import com.meawallet.mtp.sampleapp.enums.PaymentIntentActionsEnum
 import com.meawallet.mtp.sampleapp.helpers.AlertDialogHelper
 import com.meawallet.mtp.sampleapp.helpers.ErrorHelper
-import com.meawallet.mtp.sampleapp.intents.*
+import com.meawallet.mtp.sampleapp.intents.INTENT_ACTION
+import com.meawallet.mtp.sampleapp.intents.INTENT_DATA_CARD_ID_KEY
+import com.meawallet.mtp.sampleapp.intents.INTENT_DATA_CONTACTLESS_TRANSACTION_DATA
+import com.meawallet.mtp.sampleapp.intents.INTENT_DATA_ERROR_CODE_KEY
+import com.meawallet.mtp.sampleapp.intents.TransactionResultIntent
 import com.meawallet.mtp.sampleapp.listeners.AlertDialogListener
+import com.meawallet.mtp.sampleapp.listeners.DismissAlertDialogListener
 import com.meawallet.mtp.sampleapp.utils.DeviceUtils
 import com.meawallet.mtp.sampleapp.utils.getBackgroundImage
 import java.util.concurrent.Executor
@@ -41,6 +55,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     }
 
     private var aheadOfTimeAuthentication = false
+    private var isPaymentAppConfigurationChecked = false
 
     private lateinit var executor: Executor
     private lateinit var biometricPrompt: BiometricPrompt
@@ -131,6 +146,19 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         paymentViewModel.updateIsUserAuthenticated(this)
 
         setOverLockScreenFlags(isOverLockScreenRequired)
+
+        if (!isPaymentAppConfigurationChecked) {
+            isPaymentAppConfigurationChecked = true
+
+            setAsPreferredPaymentMethod()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        // Clearing it in onPause() would cause too frequent warning pop-ups.
+        isPaymentAppConfigurationChecked = false
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -216,6 +244,14 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
         when (intentAction) {
             PaymentIntentActionsEnum.INTENT_ACTION_PAY_BY_CHOSEN_CARD -> {
+
+                // Stop the manual payment flow if the current payment app can't be configured
+                // to process it.
+                if (!checkPaymentAppConfigured()) {
+                    paymentViewModel.setPaymentState(PaymentActivityState.PaymentAppMisconfigured)
+
+                    return
+                }
 
                 processCardSelectedForPayment()
             }
@@ -537,6 +573,82 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         }
     }
 
+    private fun checkPaymentAppConfigured(): Boolean {
+        Log.d(TAG, "checkPaymentAppConfigured()")
+
+        if (MeaTokenPlatform.isDefaultPaymentApplication(applicationContext)) {
+            return true
+        }
+
+        if (isForegroundPreferenceAllowed()) {
+            Log.w(TAG, "Foreground preference for payment category is allowed.")
+
+            return true
+        } else {
+            Log.w(TAG, "Foreground preference for payment category is not allowed.")
+
+            return false
+        }
+    }
+
+    private fun isForegroundPreferenceAllowed(): Boolean {
+        Log.d(TAG, "isForegroundPreferenceAllowed()")
+
+        val cardEmulation =
+            CardEmulation.getInstance(NfcAdapter.getDefaultAdapter(applicationContext))
+
+        return cardEmulation.categoryAllowsForegroundPreference(CardEmulation.CATEGORY_PAYMENT)
+    }
+
+    private fun configureForegroundService(): Boolean {
+        Log.d(TAG, "configureForegroundService()")
+
+        val cardEmulation =
+            CardEmulation.getInstance(NfcAdapter.getDefaultAdapter(applicationContext))
+        val paymentServiceComponent =
+            ComponentName(applicationContext, MeaHceService::class.java)
+
+        return cardEmulation
+            .setPreferredService(this@PaymentActivity, paymentServiceComponent)
+    }
+
+    private fun setAsPreferredPaymentMethod() {
+        Log.d(TAG, "setAsPreferredPaymentMethod()")
+
+        // If the default payment application is set, then no need to configure it again.
+        if (MeaTokenPlatform.isDefaultPaymentApplication(applicationContext)) {
+            return
+        }
+
+        // Activity can't be configured to process payment if foreground preference is not allowed.
+        if (!isForegroundPreferenceAllowed()) {
+            paymentViewModel.setPaymentState(PaymentActivityState.PaymentAppMisconfigured)
+            showWarningPaymentWillNotBeProcessed()
+
+            return
+        }
+
+        if (!configureForegroundService()) {
+            Log.w(TAG, "setAsPreferredPaymentMethod() failed to configure.")
+            paymentViewModel.setPaymentState(PaymentActivityState.PaymentAppMisconfigured)
+            showWarningPaymentWillNotBeProcessed()
+        }
+    }
+
+    private fun showWarningPaymentWillNotBeProcessed() {
+        Log.w(TAG, "showWarningPaymentWillNotBeProcessed()")
+
+        AlertDialogHelper.showWarningDialog(this,
+            getString(R.string.payment_app_will_not_process_payment_alert),
+            object : AlertDialogListener, DismissAlertDialogListener {
+                override fun onDialogDismiss() {}
+
+                override fun onOkButtonClick() {
+                    MeaTokenPlatform.setDefaultPaymentApplication(this@PaymentActivity, 1)
+                }
+            })
+    }
+
 
     override fun onFailure(error: MeaError) {
         Log.e(TAG,"MeaAuthenticationListener.onFailure()", Exception(error.message))
@@ -579,6 +691,14 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
                 paymentProgress.visibility = View.INVISIBLE
 
                 paymentFailedIc.visibility = View.INVISIBLE
+                paymentCompletedIc.visibility = View.INVISIBLE
+            }
+            is PaymentActivityState.PaymentAppMisconfigured -> {
+                paymentInfoTv.text = getText(R.string.payment_app_will_not_process_payment)
+                closeButton.visibility = View.VISIBLE
+                paymentProgress.visibility = View.INVISIBLE
+
+                paymentFailedIc.visibility = View.VISIBLE
                 paymentCompletedIc.visibility = View.INVISIBLE
             }
             is PaymentActivityState.CardChosen -> {

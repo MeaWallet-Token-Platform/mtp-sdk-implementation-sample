@@ -1,10 +1,10 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        agp_version = '8.6.0'
+        agp_version = '8.6.1'
     }
     dependencies {
-        classpath 'com.google.gms:google-services:4.4.2'
+        classpath 'com.google.gms:google-services:4.4.3'
 
         classpath 'com.huawei.agconnect:agcp:1.9.1.301' // Only if HMS build is required
         classpath "com.android.tools.build:gradle:$agp_version" // Only if HMS build is required
@@ -22,13 +22,13 @@ ext {
     minSdkVersion = 24
     targetSdkVersion = 35
 
-    coreKotlinVersion = "1.15.0"
-    archComponentsVersion = "2.8.7"
-    navigationVersion = "2.8.5"
-    appcompatVersion = "1.7.0"
+    coreKotlinVersion = "1.16.0"
+    archComponentsVersion = "2.9.2"
+    navigationVersion = "2.9.2"
+    appcompatVersion = "1.7.1"
     materialVersion = "1.12.0"
-    constraintLayoutVersion = "2.2.0"
-    firebaseVersion = "24.1.0"
+    constraintLayoutVersion = "2.2.1"
+    firebaseVersion = "24.1.2"
     pushKitVersion = "6.3.0.302"
     biometricVersion = "1.2.0-alpha05"
 
