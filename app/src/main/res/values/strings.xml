@@ -25,6 +25,7 @@
     <string name="alert_ok">Ok</string>
     <string name="alert_success">Success</string>
     <string name="alert_terms_conditions_title">Terms &amp; Conditions</string>
+    <string name="alert_warning_title">Warning</string>
     <string name="alert_error">Error</string>
 
     <string name="card_action_title">Card %1$s</string>
@@ -39,6 +40,8 @@
     <string name="show_device_unlock">Show Device Unlock</string>
 
     <string name="payment_close_activity">Close payment</string>
+    <string name="payment_app_will_not_process_payment">"Payment can't be processed by this application. \n\nSet this app as preferred payment method in NFC settings or enabled payments with the foreground app."</string>
+    <string name="payment_app_will_not_process_payment_alert">"Set this App as your default payment method or have "Pay with currently open app" enabled in NFC settings. \n\nChange the default application?"</string>
 
     <string name="add_card_tc_accept_text">I accept <u>Terms &amp; Conditions</u></string>
 
