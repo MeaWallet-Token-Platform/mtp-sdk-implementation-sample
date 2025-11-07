@@ -99,6 +99,7 @@ class MainActivity : AppCompatActivity() {
     private fun proceedWithRegister(token: String) {
         val app = application as MainApplication
         val tokenPlatform = app.appContainer.tokenPlatform
+        val initializationHelper = app.appContainer.initializationHelper
         val registrationRetrier = RegistrationRetrier(tokenPlatform)
 
         registrationRetrier.register(
@@ -117,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                 )
             },
             {
-                app.postInitializePlatformSetup()
+                initializationHelper.postInitializeSetup()
             }
         )
     }
