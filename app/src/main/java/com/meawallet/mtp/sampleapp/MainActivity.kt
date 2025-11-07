@@ -12,14 +12,13 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.meawallet.mtp.MeaError
-import com.meawallet.mtp.MeaListener
 import com.meawallet.mtp.MeaTokenPlatform
 import com.meawallet.mtp.sampleapp.databinding.ActivityMainBinding
 import com.meawallet.mtp.sampleapp.helpers.PushServiceInstanceManager
 
 
 import com.meawallet.mtp.sampleapp.listeners.PushServiceInstanceIdGetListener
+import com.meawallet.mtp.sampleapp.platform.RegistrationRetrier
 
 
 class MainActivity : AppCompatActivity() {
@@ -98,20 +97,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun proceedWithRegister(token: String) {
+        val app = application as MainApplication
+        val tokenPlatform = app.appContainer.tokenPlatform
+        val registrationRetrier = RegistrationRetrier(tokenPlatform)
 
-        MeaTokenPlatform.register(token, "en", object : MeaListener {
-            override fun onSuccess() {
+        registrationRetrier.register(
+            app,
+            token,
+            "en",
+            3,
+            {
                 Log.d(TAG,
                     "Mea Token Platform library successfully registered. $token"
                 )
-            }
-
-            override fun onFailure(error: MeaError) {
+            },
+            { error ->
                 Log.e(TAG,
                     "Mea Token Platform library registration failed: ${error.code} " + error.message
                 )
+            },
+            {
+                app.postInitializePlatformSetup()
             }
-        })
+        )
     }
-
 }
