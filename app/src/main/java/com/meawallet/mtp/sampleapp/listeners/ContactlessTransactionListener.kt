@@ -10,8 +10,9 @@ import com.meawallet.mtp.sampleapp.helpers.CardListenerEventHandler
 import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
 class ContactlessTransactionListener(
-    tokenPlatform: TokenPlatform,
-    private val context: Context
+    private val context: Context,
+    tokenPlatform: TokenPlatform
+
 ) : MeaContactlessTransactionListener {
 
     companion object {
