@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val platform by lazy { appContainer.tokenPlatform }
+    private val tokenPlatform by lazy { appContainer.tokenPlatform }
     private val initializationHelper by lazy { appContainer.initializationHelper }
 
     private val navController by  lazy {  findNavController(R.id.nav_host_fragment_activity_main) }
@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     private fun registerWallet() {
         Log.d(TAG, "registerWallet()")
 
-        if (platform.isRegistered()) {
+        if (tokenPlatform.isRegistered()) {
             Log.d(TAG, "Wallet already registered.")
             return
         }
@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun proceedWithRegister(token: String) {
-        val registrationRetrier = RegistrationRetrier(platform)
+        val registrationRetrier = RegistrationRetrier(tokenPlatform)
 
         registrationRetrier.register(
             application,

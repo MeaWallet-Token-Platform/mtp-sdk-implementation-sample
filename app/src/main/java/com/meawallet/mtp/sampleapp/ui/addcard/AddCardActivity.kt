@@ -69,10 +69,10 @@ class AddCardActivity : AppCompatActivity() {
 
     private lateinit var currentDigitizationParamsFragment: DigitizationParamProviderFragment
 
-    private val platform by lazy { appContainer.tokenPlatform }
+    private val tokenPlatform by lazy { appContainer.tokenPlatform }
     private val addCardViewModel by viewModels<AddCardViewModel> {
         viewModelFactory(AddCardViewModel::class.java) {
-            AddCardViewModel(platform)
+            AddCardViewModel(tokenPlatform)
         }
     }
 
@@ -80,8 +80,8 @@ class AddCardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_card)
 
-        if (!platform.isInitialized()) {
-            platform.initialize(this)
+        if (!tokenPlatform.isInitialized()) {
+            tokenPlatform.initialize(this)
         }
 
         inflateAndSetupViews()
@@ -524,7 +524,7 @@ class AddCardActivity : AppCompatActivity() {
 
     private fun downloadCardImage(card: MeaCard) {
         if (card.hasBackgroundImage()) {
-            card.downloadBackgroundImage(this)
+            card.downloadBackgroundImage(this, tokenPlatform)
         } else {
             Log.d(TAG,"This card (cardId = ${card.id}) doesn't have background image")
         }

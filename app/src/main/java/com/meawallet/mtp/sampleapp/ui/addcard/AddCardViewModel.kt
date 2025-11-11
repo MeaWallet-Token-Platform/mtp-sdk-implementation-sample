@@ -7,7 +7,7 @@ import com.meawallet.mtp.*
 import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
 class AddCardViewModel(
-    private val platform: TokenPlatform
+    private val tokenPlatform: TokenPlatform
 ) : ViewModel() {
 
     private var _prevDigitizationState: CardDigitizationActivityState? = null
@@ -24,7 +24,7 @@ class AddCardViewModel(
     ) {
         setDigitizationState(CardDigitizationActivityState.InProgress)
 
-        platform.initializeDigitization(params, listener)
+        tokenPlatform.initializeDigitization(params, listener)
     }
 
     fun completeDigitization(
@@ -33,7 +33,7 @@ class AddCardViewModel(
         listener: MeaCompleteDigitizationListener) {
         setDigitizationState(CardDigitizationActivityState.InProgress)
 
-        platform.completeDigitization(
+        tokenPlatform.completeDigitization(
             card.eligibilityReceipt,
             card.termsAndConditionsAssetId,
             termsAnConditionsAcceptedTime,
@@ -47,7 +47,7 @@ class AddCardViewModel(
         listener: MeaListener) {
         setDigitizationState(CardDigitizationActivityState.InProgress)
 
-        platform.initializeAdditionalAuthenticationForDigitization(
+        tokenPlatform.initializeAdditionalAuthenticationForDigitization(
             id,
             authMethodId,
             listener)
@@ -59,14 +59,14 @@ class AddCardViewModel(
         listener: MeaCompleteAuthenticationListener) {
         setDigitizationState(CardDigitizationActivityState.InProgress)
 
-        platform.completeAdditionalAuthenticationForDigitization(
+        tokenPlatform.completeAdditionalAuthenticationForDigitization(
             cardId,
             authenticationCode,
             listener)
     }
 
     fun getTermsAndConditions(termsAndConditionsAssetId: String, listener: MeaGetAssetListener) {
-        platform.getAsset(termsAndConditionsAssetId, listener)
+        tokenPlatform.getAsset(termsAndConditionsAssetId, listener)
     }
 
     fun setTermsAndConditionsAccepted(isAccepted: Boolean) {
@@ -100,6 +100,6 @@ class AddCardViewModel(
     }
 
     fun getCardByEligibilityReceipt(eligibilityReceipt: String): MeaCard? {
-        return platform.getCards().find { it.eligibilityReceipt == eligibilityReceipt }
+        return tokenPlatform.getCards().find { it.eligibilityReceipt == eligibilityReceipt }
     }
 }

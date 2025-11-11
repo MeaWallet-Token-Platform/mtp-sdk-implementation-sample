@@ -7,23 +7,23 @@ import com.meawallet.mtp.sampleapp.helpers.PushServiceInstanceManager
 import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
 class StatusViewModel(
-    private val platform: TokenPlatform
+    private val tokenPlatform: TokenPlatform
 ) : ViewModel() {
 
     private val _sdkVersion = MutableLiveData<String>().apply {
-        value = "${platform.configuration.versionName()}; " +
-                "${platform.configuration.buildType()}; " +
-                platform.configuration.cdCvmModel()
+        value = "${tokenPlatform.configuration.versionName()}; " +
+                "${tokenPlatform.configuration.buildType()}; " +
+                tokenPlatform.configuration.cdCvmModel()
     }
     val sdkVersion: LiveData<String> = _sdkVersion
 
     private val _isInitialized = MutableLiveData<Boolean>().apply {
-        value = platform.isInitialized()
+        value = tokenPlatform.isInitialized()
     }
     val isInitialized: LiveData<Boolean> = _isInitialized
 
     private val _isRegistered = MutableLiveData<Boolean>().apply {
-        value = platform.isRegistered()
+        value = tokenPlatform.isRegistered()
     }
     val isRegistered: LiveData<Boolean> = _isRegistered
 
@@ -36,12 +36,12 @@ class StatusViewModel(
     }
 
     private val _isSecureNfcSupported = MutableLiveData<Boolean>().apply {
-        value = platform.isSecureNfcSupported()
+        value = tokenPlatform.isSecureNfcSupported()
     }
     val isSecureNfcSupported: LiveData<Boolean> = _isSecureNfcSupported
 
     private val _isSecureNfcEnabled = MutableLiveData<Boolean>().apply {
-        value = platform.isSecureNfcEnabled()
+        value = tokenPlatform.isSecureNfcEnabled()
     }
     val isSecureNfcEnabled: LiveData<Boolean> = _isSecureNfcEnabled
 
@@ -49,7 +49,7 @@ class StatusViewModel(
         value = false
     }
     private fun updateIsDefaultPaymentApp(context: Context) {
-        _isDefaultPaymentApp.setValue(platform.isDefaultPaymentApplication(context))
+        _isDefaultPaymentApp.setValue(tokenPlatform.isDefaultPaymentApplication(context))
     }
     fun isDefaultPaymentApp(context: Context): LiveData<Boolean> {
         updateIsDefaultPaymentApp(context)
@@ -60,8 +60,8 @@ class StatusViewModel(
         value = false
     }
     fun updateIsUserAuthenticated() {
-        if (platform.isInitialized()) {
-            _isUserAuthenticated.setValue(platform.cdCvm.isCardholderAuthenticated())
+        if (tokenPlatform.isInitialized()) {
+            _isUserAuthenticated.setValue(tokenPlatform.cdCvm.isCardholderAuthenticated())
         }
     }
     fun isUserAuthenticated(): LiveData<Boolean> {
@@ -70,7 +70,7 @@ class StatusViewModel(
     }
 
     fun setDefaultApplication(activity: Activity) {
-        platform.setDefaultPaymentApplication(activity, 420)
+        tokenPlatform.setDefaultPaymentApplication(activity, 420)
     }
 
 }

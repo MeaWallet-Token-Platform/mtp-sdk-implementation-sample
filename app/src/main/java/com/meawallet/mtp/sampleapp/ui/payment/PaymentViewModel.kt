@@ -7,12 +7,12 @@ import androidx.lifecycle.ViewModel
 import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
 class PaymentViewModel(
-    private val platform: TokenPlatform
+    private val tokenPlatform: TokenPlatform
 ) : ViewModel() {
 
     private fun checkPlatformInitialized(context: Context) {
-        if (!platform.isInitialized()) {
-            platform.initialize(context)
+        if (!tokenPlatform.isInitialized()) {
+            tokenPlatform.initialize(context)
         }
     }
 
@@ -32,7 +32,7 @@ class PaymentViewModel(
     }
     fun updateIsUserAuthenticated(context: Context) {
         checkPlatformInitialized(context)
-        _isUserAuthenticated.value = platform.cdCvm.isCardholderAuthenticated()
+        _isUserAuthenticated.value = tokenPlatform.cdCvm.isCardholderAuthenticated()
     }
     fun isUserAuthenticated(context: Context): LiveData<Boolean> {
         updateIsUserAuthenticated(context)
