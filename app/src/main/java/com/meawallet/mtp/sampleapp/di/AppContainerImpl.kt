@@ -4,7 +4,7 @@ import android.content.Context
 import com.meawallet.mtp.sampleapp.platform.InitializationHelper
 import com.meawallet.mtp.sampleapp.platform.MeaTokenPlatformAdapter
 
-class AppContainerImpl (
+class AppContainerImpl(
         private val appContext: Context
 ) : AppContainer {
         override val tokenPlatform by lazy { MeaTokenPlatformAdapter() }

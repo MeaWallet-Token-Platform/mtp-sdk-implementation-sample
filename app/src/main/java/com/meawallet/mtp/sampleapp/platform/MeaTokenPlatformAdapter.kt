@@ -25,7 +25,7 @@ import com.meawallet.mtp.MeaWalletPinAuthenticationListener
 import com.meawallet.mtp.MeaWalletPinListener
 import java.util.Currency
 
-class MeaTokenPlatformAdapter () : TokenPlatform {
+class MeaTokenPlatformAdapter : TokenPlatform {
     override fun initialize(context: Context) {
         MeaTokenPlatform.initialize(context)
     }
