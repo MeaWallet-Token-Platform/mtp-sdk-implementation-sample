@@ -12,8 +12,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.meawallet.mtp.MeaTokenPlatform
 import com.meawallet.mtp.sampleapp.databinding.ActivityMainBinding
+import com.meawallet.mtp.sampleapp.di.appContainer
 import com.meawallet.mtp.sampleapp.helpers.PushServiceInstanceManager
 
 
@@ -28,6 +28,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityMainBinding
+
+    private val platform by lazy { appContainer.tokenPlatform }
+    private val initializationHelper by lazy { appContainer.initializationHelper }
 
     private val navController by  lazy {  findNavController(R.id.nav_host_fragment_activity_main) }
 
@@ -78,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     private fun registerWallet() {
         Log.d(TAG, "registerWallet()")
 
-        if (MeaTokenPlatform.isRegistered()) {
+        if (platform.isRegistered()) {
             Log.d(TAG, "Wallet already registered.")
             return
         }
@@ -97,13 +100,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun proceedWithRegister(token: String) {
-        val app = application as MainApplication
-        val tokenPlatform = app.appContainer.tokenPlatform
-        val initializationHelper = app.appContainer.initializationHelper
-        val registrationRetrier = RegistrationRetrier(tokenPlatform)
+        val registrationRetrier = RegistrationRetrier(platform)
 
         registrationRetrier.register(
-            app,
+            application,
             token,
             "en",
             3,

@@ -18,6 +18,7 @@ import com.meawallet.mtp.*
 import com.meawallet.mtp.sampleapp.R
 import com.meawallet.mtp.sampleapp.enums.PaymentIntentActionsEnum
 import com.meawallet.mtp.sampleapp.intents.CardIntent
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 import com.meawallet.mtp.sampleapp.ui.addcard.AddCardActivity
 import com.meawallet.mtp.sampleapp.ui.payment.PaymentActivity
 import com.meawallet.mtp.sampleapp.utils.DeviceUtils
@@ -25,7 +26,9 @@ import com.meawallet.mtp.sampleapp.utils.isReadyForPayment
 import com.meawallet.mtp.sampleapp.utils.isSelectedForPayment
 
 
-class CardListAdapter : RecyclerView.Adapter<CardListAdapter.ViewHolder>() {
+class CardListAdapter(
+    private val platform: TokenPlatform
+) : RecyclerView.Adapter<CardListAdapter.ViewHolder>() {
 
     private var meaCards: ArrayList<MeaCard> = ArrayList()
 
@@ -213,7 +216,7 @@ class CardListAdapter : RecyclerView.Adapter<CardListAdapter.ViewHolder>() {
 
                 override fun onSuccess(p0: MeaCard) {
                     Toast.makeText(cardIdTv.context, "All super good. Marked for deletion.", Toast.LENGTH_LONG).show()
-                    updateCards(MeaTokenPlatform.getCards())
+                    updateCards(platform.getCards())
                 }
 
             })
@@ -227,7 +230,7 @@ class CardListAdapter : RecyclerView.Adapter<CardListAdapter.ViewHolder>() {
 
                 override fun onSuccess(p0: MeaCard) {
                     Toast.makeText(cardIdTv.context, "All super good. Card deleted.", Toast.LENGTH_LONG).show()
-                    updateCards(MeaTokenPlatform.getCards())
+                    updateCards(platform.getCards())
                 }
             })
         }
@@ -235,13 +238,13 @@ class CardListAdapter : RecyclerView.Adapter<CardListAdapter.ViewHolder>() {
         private fun setAsDefaultForContactless(card: MeaCard) {
             card.deselectForContactlessPayment()
             card.setAsDefaultForContactlessPayments()
-            updateCards(MeaTokenPlatform.getCards())
+            updateCards(platform.getCards())
         }
 
         private fun unsetAsDefaultForContactless(card: MeaCard) {
             card.deselectForContactlessPayment()
             card.unsetAsDefaultForContactlessPayments()
-            updateCards(MeaTokenPlatform.getCards())
+            updateCards(platform.getCards())
         }
 
         private fun selectForContactlessPayment(card: MeaCard) {
@@ -251,14 +254,14 @@ class CardListAdapter : RecyclerView.Adapter<CardListAdapter.ViewHolder>() {
                 }
 
                 override fun onSuccess(p0: MeaCard) {
-                    updateCards(MeaTokenPlatform.getCards())
+                    updateCards(platform.getCards())
                 }
             })
         }
 
         private fun deselectForContactlessPayment(card: MeaCard) {
             card.deselectForContactlessPayment()
-            updateCards(MeaTokenPlatform.getCards())
+            updateCards(platform.getCards())
         }
 
         private fun deletePaymentTokens(card: MeaCard) {

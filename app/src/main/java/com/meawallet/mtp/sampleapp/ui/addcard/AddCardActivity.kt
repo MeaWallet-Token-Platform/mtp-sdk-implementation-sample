@@ -8,9 +8,9 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -18,10 +18,13 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.meawallet.mtp.*
 import com.meawallet.mtp.sampleapp.R
+import com.meawallet.mtp.sampleapp.di.appContainer
 import com.meawallet.mtp.sampleapp.helpers.AlertDialogHelper
 import com.meawallet.mtp.sampleapp.listeners.DismissAlertDialogListener
+import com.meawallet.mtp.sampleapp.ui.viewModelFactory
 import com.meawallet.mtp.sampleapp.utils.downloadBackgroundImage
 import com.meawallet.mtp.sampleapp.utils.hasBackgroundImage
+import kotlin.getValue
 
 class AddCardActivity : AppCompatActivity() {
 
@@ -32,8 +35,6 @@ class AddCardActivity : AppCompatActivity() {
 
         private val FIRST_DIGITIZATION_METHOD = DigitizationMethodEnum.PAN
     }
-
-    private lateinit var addCardViewModel: AddCardViewModel
 
     private var cardDigitizationActivityState: CardDigitizationActivityState? = null
     private var cardInAction: MeaCard? = null
@@ -68,16 +69,20 @@ class AddCardActivity : AppCompatActivity() {
 
     private lateinit var currentDigitizationParamsFragment: DigitizationParamProviderFragment
 
+    private val platform by lazy { appContainer.tokenPlatform }
+    private val addCardViewModel by viewModels<AddCardViewModel> {
+        viewModelFactory(AddCardViewModel::class.java) {
+            AddCardViewModel(platform)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_card)
 
-        if (!MeaTokenPlatform.isInitialized()) {
-            MeaTokenPlatform.initialize(this)
+        if (!platform.isInitialized()) {
+            platform.initialize(this)
         }
-
-        addCardViewModel =
-            ViewModelProvider(this)[AddCardViewModel::class.java]
 
         inflateAndSetupViews()
 

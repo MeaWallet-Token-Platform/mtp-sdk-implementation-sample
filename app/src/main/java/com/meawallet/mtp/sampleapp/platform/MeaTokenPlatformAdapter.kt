@@ -3,6 +3,7 @@ package com.meawallet.mtp.sampleapp.platform
 import android.app.Activity
 import android.app.FragmentManager
 import android.content.Context
+import com.meawallet.mtp.CdCvmType
 import com.meawallet.mtp.MeaAuthenticationListener
 import com.meawallet.mtp.MeaCard
 import com.meawallet.mtp.MeaCardProvisionListener
@@ -24,9 +25,7 @@ import com.meawallet.mtp.MeaWalletPinAuthenticationListener
 import com.meawallet.mtp.MeaWalletPinListener
 import java.util.Currency
 
-class MeaTokenPlatformAdapter (
-//    private val appContext: Context
-) : TokenPlatform {
+class MeaTokenPlatformAdapter () : TokenPlatform {
     override fun initialize(context: Context) {
         MeaTokenPlatform.initialize(context)
     }
@@ -54,7 +53,7 @@ class MeaTokenPlatformAdapter (
         params: MeaInitializeDigitizationParameters,
         listener: MeaInitializeDigitizationListener?
     ) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.initializeDigitization(params, listener)
     }
 
     override fun completeDigitization(
@@ -64,7 +63,13 @@ class MeaTokenPlatformAdapter (
         securityCode: String?,
         listener: MeaCompleteDigitizationListener?
     ) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.completeDigitization(
+            eligibilityReceiptValue,
+            termsAndConditionsAssetId,
+            termsAndConditionsAcceptTimestamp,
+            securityCode,
+            listener
+        )
     }
 
     override fun initializeAdditionalAuthenticationForDigitization(
@@ -72,7 +77,11 @@ class MeaTokenPlatformAdapter (
         authenticationMethodId: String,
         listener: MeaListener?
     ) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.initializeAdditionalAuthenticationForDigitization(
+            cardId,
+            authenticationMethodId,
+            listener
+        )
     }
 
     override fun completeAdditionalAuthenticationForDigitization(
@@ -80,14 +89,18 @@ class MeaTokenPlatformAdapter (
         authenticationCode: String,
         listener: MeaCompleteAuthenticationListener?
     ) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.completeAdditionalAuthenticationForDigitization(
+            cardId,
+            authenticationCode,
+            listener
+        )
     }
 
     override fun getAsset(
         assetId: String,
         listener: MeaGetAssetListener?
     ) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.getAsset(assetId, listener)
     }
 
     override fun isRegistered(): Boolean {
@@ -95,7 +108,7 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun getCardById(cardId: String): MeaCard? {
-        TODO("Not yet implemented")
+        return MeaTokenPlatform.getCardById(cardId)
     }
 
     override fun getCardByEligibilityReceipt(eligibilityReceipt: String): MeaCard? {
@@ -103,7 +116,7 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun getCards(): List<MeaCard> {
-        TODO("Not yet implemented")
+        return MeaTokenPlatform.getCards()
     }
 
     override fun markAllCardsForDeletion(listener: MeaListener?) {
@@ -115,11 +128,11 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun getCardSelectedForContactlessPayment(): MeaCard? {
-        TODO("Not yet implemented")
+        return MeaTokenPlatform.getCardSelectedForContactlessPayment()
     }
 
     override fun getDefaultCardForContactlessPayments(): MeaCard? {
-        TODO("Not yet implemented")
+       return MeaTokenPlatform.getDefaultCardForContactlessPayments()
     }
 
     override fun getDefaultCardForRemotePayments(): MeaCard? {
@@ -127,14 +140,14 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun isDefaultPaymentApplication(context: Context): Boolean {
-        TODO("Not yet implemented")
+        return MeaTokenPlatform.isDefaultPaymentApplication(context)
     }
 
     override fun setDefaultPaymentApplication(
         activity: Activity,
         requestCode: Int
     ) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.setDefaultPaymentApplication(activity, requestCode)
     }
 
     override fun deleteAllPaymentTokens() {
@@ -154,7 +167,7 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun setAuthenticationListener(listener: MeaAuthenticationListener?) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.setAuthenticationListener(listener)
     }
 
     override fun removeAuthenticationListener() {
@@ -162,7 +175,7 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun requestCardholderAuthentication() {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.requestCardholderAuthentication()
     }
 
     override fun registerDeviceUnlockReceiver() {
@@ -170,7 +183,7 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun authenticateWithDeviceUnlock() {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.authenticateWithDeviceUnlock()
     }
 
     override fun authenticateWithWalletPin(
@@ -204,7 +217,7 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun setCardReplenishListener(listener: MeaCardReplenishListener?) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.setCardReplenishListener(listener)
     }
 
     override fun removeCardReplenishListener() {
@@ -212,7 +225,7 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun setDigitizedCardStateChangeListener(listener: MeaDigitizedCardStateChangeListener?) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.setDigitizedCardStateChangeListener(listener)
     }
 
     override fun removeDigitizedCardStateChangeListener() {
@@ -288,11 +301,11 @@ class MeaTokenPlatformAdapter (
     }
 
     override fun isSecureNfcSupported(): Boolean {
-        TODO("Not yet implemented")
+        return MeaTokenPlatform.isSecureNfcSupported()
     }
 
     override fun isSecureNfcEnabled(): Boolean {
-        TODO("Not yet implemented")
+        return MeaTokenPlatform.isSecureNfcEnabled()
     }
 
     override fun openSecureNfcSettings(activity: Activity) {
@@ -351,17 +364,74 @@ class MeaTokenPlatformAdapter (
         TODO("Not yet implemented")
     }
 
-    override fun isMainProcess(context: Context): Boolean {
-        TODO("Not yet implemented")
+    private val _configuration: TokenPlatform.Configuration by lazy {
+        object : TokenPlatform.Configuration {
+            override fun versionCode(): Int = MeaTokenPlatform.Configuration.versionCode()
+            override fun versionName(): String = MeaTokenPlatform.Configuration.versionName()
+            override fun buildType(): String = MeaTokenPlatform.Configuration.buildType()
+            override fun cdCvmModel(): String = MeaTokenPlatform.Configuration.cdCvmModel()
+            override fun isSaveAuthWhenLocked(): Boolean =
+                MeaTokenPlatform.Configuration.isSaveAuthWhenLocked()
+        }
+    }
+
+    private val _cdCvm: TokenPlatform.CdCvm by lazy {
+        object : TokenPlatform.CdCvm {
+            override fun getType(): CdCvmType? =
+                MeaTokenPlatform.CdCvm.getType()
+
+            override fun isCardholderAuthenticated(): Boolean =
+                MeaTokenPlatform.CdCvm.isCardholderAuthenticated()
+
+            override fun isBiometricFingerprintCdCvmSupported(): Boolean =
+                MeaTokenPlatform.CdCvm.isBiometricFingerprintCdCvmSupported()
+
+            override fun isDeviceUnlockCdCvmSupported(): Boolean =
+                MeaTokenPlatform.CdCvm.isDeviceUnlockCdCvmSupported()
+        }
+    }
+
+    private val _stepUpAuth: TokenPlatform.StepUpAuth by lazy {
+        object : TokenPlatform.StepUpAuth {
+            override fun stepUpAuthenticated() =
+                MeaTokenPlatform.StepUpAuth.stepUpAuthenticated()
+
+            override fun isStepUpAuthenticated(): Boolean =
+                MeaTokenPlatform.StepUpAuth.isStepUpAuthenticated()
+
+            override fun getLvtAmountThreshold(): Int =
+                MeaTokenPlatform.StepUpAuth.getLvtAmountThreshold()
+
+            override fun getRemainingCumulativeLvtAmount(): Int =
+                MeaTokenPlatform.StepUpAuth.getRemainingCumulativeLvtAmount()
+
+            override fun clearCumulativeLvtAmount() =
+                MeaTokenPlatform.StepUpAuth.clearCumulativeLvtAmount()
+        }
+    }
+
+    private val _rns: TokenPlatform.Rns by lazy {
+        object : TokenPlatform.Rns {
+            override fun isMeaRemoteMessage(messageData: Map<*, *>): Boolean =
+                MeaTokenPlatform.Rns.isMeaRemoteMessage(messageData)
+
+            override fun isMeaTransactionMessage(messageData: Map<*, *>): Boolean =
+                MeaTokenPlatform.Rns.isMeaTransactionMessage(messageData)
+
+            override fun onMessageReceived(messageData: Map<String, String>) =
+                MeaTokenPlatform.Rns.onMessageReceived(messageData)
+
+            override fun parseTransactionMessage(messageData: Map<String, String>): com.meawallet.mtp.MeaTransactionMessage? =
+                MeaTokenPlatform.Rns.parseTransactionMessage(messageData)
+        }
     }
 
     override val cdCvm: TokenPlatform.CdCvm
-        get() = TODO("Not yet implemented")
+        get() = _cdCvm
     override val stepUpAuth: TokenPlatform.StepUpAuth
-        get() = TODO("Not yet implemented")
+        get() = _stepUpAuth
     override val rns: TokenPlatform.Rns
-        get() = TODO("Not yet implemented")
+        get() = _rns
     override val configuration: TokenPlatform.Configuration
-        get() = TODO("Not yet implemented")
-
+        get() = _configuration
 }

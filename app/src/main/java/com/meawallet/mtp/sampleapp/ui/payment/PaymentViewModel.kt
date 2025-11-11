@@ -4,13 +4,15 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.meawallet.mtp.MeaTokenPlatform
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
-class PaymentViewModel : ViewModel() {
+class PaymentViewModel(
+    private val platform: TokenPlatform
+) : ViewModel() {
 
     private fun checkPlatformInitialized(context: Context) {
-        if (!MeaTokenPlatform.isInitialized()) {
-            MeaTokenPlatform.initialize(context)
+        if (!platform.isInitialized()) {
+            platform.initialize(context)
         }
     }
 
@@ -18,7 +20,7 @@ class PaymentViewModel : ViewModel() {
         MutableLiveData(PaymentActivityState.Empty)
 
     fun setPaymentState(state: PaymentActivityState) {
-        _paymentState.setValue(state)
+        _paymentState.value = state
     }
     fun getPaymentState(): LiveData<PaymentActivityState> {
         return _paymentState
@@ -30,7 +32,7 @@ class PaymentViewModel : ViewModel() {
     }
     fun updateIsUserAuthenticated(context: Context) {
         checkPlatformInitialized(context)
-        _isUserAuthenticated.setValue(MeaTokenPlatform.CdCvm.isCardholderAuthenticated())
+        _isUserAuthenticated.value = platform.cdCvm.isCardholderAuthenticated()
     }
     fun isUserAuthenticated(context: Context): LiveData<Boolean> {
         updateIsUserAuthenticated(context)

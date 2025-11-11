@@ -16,11 +16,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -30,8 +30,8 @@ import com.meawallet.mtp.MeaCheckedException
 import com.meawallet.mtp.MeaContactlessTransactionData
 import com.meawallet.mtp.MeaError
 import com.meawallet.mtp.MeaHceService
-import com.meawallet.mtp.MeaTokenPlatform
 import com.meawallet.mtp.sampleapp.R
+import com.meawallet.mtp.sampleapp.di.appContainer
 import com.meawallet.mtp.sampleapp.enums.PaymentIntentActionsEnum
 import com.meawallet.mtp.sampleapp.helpers.AlertDialogHelper
 import com.meawallet.mtp.sampleapp.helpers.ErrorHelper
@@ -42,9 +42,11 @@ import com.meawallet.mtp.sampleapp.intents.INTENT_DATA_ERROR_CODE_KEY
 import com.meawallet.mtp.sampleapp.intents.TransactionResultIntent
 import com.meawallet.mtp.sampleapp.listeners.AlertDialogListener
 import com.meawallet.mtp.sampleapp.listeners.DismissAlertDialogListener
+import com.meawallet.mtp.sampleapp.ui.viewModelFactory
 import com.meawallet.mtp.sampleapp.utils.DeviceUtils
 import com.meawallet.mtp.sampleapp.utils.getBackgroundImage
 import java.util.concurrent.Executor
+import kotlin.getValue
 
 class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
@@ -70,7 +72,12 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     private lateinit var paymentFailedIc: View
     private lateinit var paymentCompletedIc: View
 
-    private val paymentViewModel by lazy { ViewModelProvider(this)[PaymentViewModel::class.java] }
+    private val platform by lazy { appContainer.tokenPlatform }
+    private val paymentViewModel by viewModels<PaymentViewModel> {
+        viewModelFactory(PaymentViewModel::class.java) {
+            PaymentViewModel(platform)
+        }
+    }
 
     private var paymentActivityState: PaymentActivityState? = null
     private var cardInAction: MeaCard? = null
@@ -80,7 +87,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_process_payment)
 
-        MeaTokenPlatform.setAuthenticationListener(this)
+        platform.setAuthenticationListener(this)
 
         inflateAndSetupViews()
 
@@ -142,7 +149,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     override fun onResume() {
         super.onResume()
 
-        MeaTokenPlatform.registerDeviceUnlockReceiver()
+        platform.registerDeviceUnlockReceiver()
         paymentViewModel.updateIsUserAuthenticated(this)
 
         setOverLockScreenFlags(isOverLockScreenRequired)
@@ -277,9 +284,9 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
                         }
 
                         try {
-                            var selectedCard = MeaTokenPlatform.getCardSelectedForContactlessPayment()
+                            var selectedCard = platform.getCardSelectedForContactlessPayment()
                             if (selectedCard == null || selectedCard.id != cardId) {
-                                selectedCard = MeaTokenPlatform.getDefaultCardForContactlessPayments()
+                                selectedCard = platform.getDefaultCardForContactlessPayments()
                             }
 
                             if (selectedCard != null && selectedCard.id == cardId) {
@@ -358,7 +365,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         // If there is no valid user authentication, prompt authentication before the Tap
         // Applicable only if cardholder verification method is ALWAYS_CDCVM
         if (paymentViewModel.isUserAuthenticated(this).value != true
-            && MeaTokenPlatform.Configuration.cdCvmModel() == "ALWAYS_CDCVM") {
+            && platform.configuration.cdCvmModel() == "ALWAYS_CDCVM") {
 
             authenticateCardholder(true)
         }
@@ -367,7 +374,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     }
 
     private fun renderCardVisual(cardId: String) {
-        MeaTokenPlatform.getCardById(cardId)?.let { card ->
+        platform.getCardById(cardId)?.let { card ->
             card.getBackgroundImage(this)?.apply {
                 cardView.foreground = this
             }
@@ -408,7 +415,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
     private fun getSelectedCard(): MeaCard? {
         try {
-            return MeaTokenPlatform.getCardSelectedForContactlessPayment()
+            return platform.getCardSelectedForContactlessPayment()
         } catch (exception: MeaCheckedException) {
             ErrorHelper.handleMeaCheckedException(this, exception)
         }
@@ -476,7 +483,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         this.aheadOfTimeAuthentication = aheadOfTimeAuthentication
 
         try {
-            MeaTokenPlatform.requestCardholderAuthentication()
+            platform.requestCardholderAuthentication()
         } catch (exception: MeaCheckedException) {
             ErrorHelper.handleMeaCheckedException(this, exception)
         }
@@ -489,7 +496,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
             //TODO: Super important to add this line. It the actual way of
             // informing SDK that device authentication has succeeded
-            MeaTokenPlatform.authenticateWithDeviceUnlock()
+            platform.authenticateWithDeviceUnlock()
 
         } catch (exception: MeaCheckedException) {
             Log.e(TAG,"Failed to authenticate with device unlock.", exception)
@@ -576,7 +583,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     private fun checkPaymentAppConfigured(): Boolean {
         Log.d(TAG, "checkPaymentAppConfigured()")
 
-        if (MeaTokenPlatform.isDefaultPaymentApplication(applicationContext)) {
+        if (platform.isDefaultPaymentApplication(applicationContext)) {
             return true
         }
 
@@ -616,7 +623,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         Log.d(TAG, "setAsPreferredPaymentMethod()")
 
         // If the default payment application is set, then no need to configure it again.
-        if (MeaTokenPlatform.isDefaultPaymentApplication(applicationContext)) {
+        if (platform.isDefaultPaymentApplication(applicationContext)) {
             return
         }
 
@@ -644,7 +651,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
                 override fun onDialogDismiss() {}
 
                 override fun onOkButtonClick() {
-                    MeaTokenPlatform.setDefaultPaymentApplication(this@PaymentActivity, 1)
+                    platform.setDefaultPaymentApplication(this@PaymentActivity, 1)
                 }
             })
     }
@@ -748,5 +755,4 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
             }
         }
     }
-
 }

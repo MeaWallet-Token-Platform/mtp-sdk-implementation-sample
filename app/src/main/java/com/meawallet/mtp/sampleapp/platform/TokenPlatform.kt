@@ -143,9 +143,6 @@ interface TokenPlatform {
     fun removeDefaultTransactionLimit(listener: MeaListener?)
     fun clearAllTransactionLimits(listener: MeaListener?)
 
-    @Deprecated("Deprecated in MeaTokenPlatform")
-    fun isMainProcess(context: Context): Boolean
-
     val cdCvm: CdCvm
     val stepUpAuth: StepUpAuth
     val rns: Rns
