@@ -15,7 +15,7 @@ class InitializationHelper(
         private val TAG = InitializationHelper::class.java.simpleName
     }
 
-    private val transactionReceiver by lazy { TransactionReceiver() }
+    private val transactionReceiver by lazy { TransactionReceiver(tokenPlatform) }
 
     fun initializePlatform() {
         if (tokenPlatform.isInitialized()) {

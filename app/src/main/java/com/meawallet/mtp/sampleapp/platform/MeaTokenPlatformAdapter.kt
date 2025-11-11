@@ -297,7 +297,7 @@ class MeaTokenPlatformAdapter () : TokenPlatform {
         consumerLanguage: String?,
         listener: MeaListener?
     ) {
-        TODO("Not yet implemented")
+        MeaTokenPlatform.updateDeviceInfo(pushServiceInstanceIdToken, consumerLanguage, listener)
     }
 
     override fun isSecureNfcSupported(): Boolean {
