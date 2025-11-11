@@ -11,7 +11,7 @@ import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
 class ContactlessTransactionListener(
     tokenPlatform: TokenPlatform,
-    val context: Context
+    private val context: Context
 ) : MeaContactlessTransactionListener {
 
     companion object {
