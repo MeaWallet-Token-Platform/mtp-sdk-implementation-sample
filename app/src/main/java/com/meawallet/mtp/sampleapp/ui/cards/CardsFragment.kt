@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.meawallet.mtp.*
 import com.meawallet.mtp.sampleapp.databinding.FragmentCardsBinding
 import com.meawallet.mtp.sampleapp.di.appContainer
-import kotlin.getValue
 
 class CardsFragment : Fragment() {
 

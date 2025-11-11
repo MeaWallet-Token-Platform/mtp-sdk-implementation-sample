@@ -46,7 +46,6 @@ import com.meawallet.mtp.sampleapp.ui.viewModelFactory
 import com.meawallet.mtp.sampleapp.utils.DeviceUtils
 import com.meawallet.mtp.sampleapp.utils.getBackgroundImage
 import java.util.concurrent.Executor
-import kotlin.getValue
 
 class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 

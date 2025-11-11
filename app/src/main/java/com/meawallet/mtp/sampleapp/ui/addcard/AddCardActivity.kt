@@ -24,7 +24,6 @@ import com.meawallet.mtp.sampleapp.listeners.DismissAlertDialogListener
 import com.meawallet.mtp.sampleapp.ui.viewModelFactory
 import com.meawallet.mtp.sampleapp.utils.downloadBackgroundImage
 import com.meawallet.mtp.sampleapp.utils.hasBackgroundImage
-import kotlin.getValue
 
 class AddCardActivity : AppCompatActivity() {
 
