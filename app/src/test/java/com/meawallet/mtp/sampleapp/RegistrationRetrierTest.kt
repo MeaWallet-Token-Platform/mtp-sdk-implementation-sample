@@ -152,7 +152,7 @@ class RegistrationRetrierTest {
             context = context,
             token = "T",
             language = "en",
-            retryCount = 2,
+            attemptCount = 2,
             onSuccess = { successCalls++ },
             onFinalFailure = { finalError = it },
             postInitialize = { /* no-op */ }
@@ -215,7 +215,7 @@ class RegistrationRetrierTest {
             context = context,
             token = "T",
             language = "en",
-            retryCount = 2,
+            attemptCount = 2,
             onSuccess = { fail("should not succeed") },
             onFinalFailure = { finalError = it }
         )
@@ -247,7 +247,7 @@ class RegistrationRetrierTest {
             context = context,
             token = "T",
             language = "en",
-            retryCount = 2,
+            attemptCount = 2,
             onSuccess = { fail("should not succeed") },
             onFinalFailure = { finalError = it }
         )
@@ -278,7 +278,7 @@ class RegistrationRetrierTest {
             context = context,
             token = "T",
             language = "en",
-            retryCount = 2,
+            attemptCount = 2,
             onSuccess = { /* ignore */ },
             onFinalFailure = { fail("should not fail") },
             postInitialize = { postInitCalled = true }
@@ -318,7 +318,7 @@ class RegistrationRetrierTest {
             context = context,
             token = "T",
             language = "en",
-            retryCount = 2,
+            attemptCount = 2,
             onSuccess = { successCalls++ },
             onFinalFailure = { finalError = it }
         )
@@ -344,7 +344,7 @@ class RegistrationRetrierTest {
     }
 
     @Test
-    fun `given retriable registration when retry count exceeded then fails permanently`() {
+    fun `given retriable registration when attempt count exceeded then fails permanently`() {
         val platform = mock<TokenPlatform>()
         whenever(platform.isRegistered()).thenReturn(false)
 
@@ -364,7 +364,7 @@ class RegistrationRetrierTest {
             context = context,
             token = "T",
             language = "en",
-            retryCount = 3,
+            attemptCount = 3,
             onSuccess = { successCalls++ },
             onFinalFailure = { finalError = it }
         )
@@ -396,7 +396,7 @@ class RegistrationRetrierTest {
             context = context,
             token = "T",
             language = "en",
-            retryCount = 2,
+            attemptCount = 2,
             onSuccess = { fail("should not succeed") },
             onFinalFailure = { finalError = it },
             postInitialize = { throw RuntimeException("boom") }

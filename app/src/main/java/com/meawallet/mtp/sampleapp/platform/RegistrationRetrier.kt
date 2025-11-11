@@ -22,19 +22,19 @@ class RegistrationRetrier(
     }
 
     /**
-     * Start registration with up to [retryCount] attempts.
-     * Returns a [com.meawallet.mtp.sampleapp.utils.Cancellable] you can call (e.g., in onStop) to stop further retries.
+     * Start registration with up to [attemptCount] attempts.
+     * Returns a [Cancellable] you can call (e.g., in onStop) to stop further retries.
      */
     fun register(
         context: Context,
         token: String,
         language: String,
-        retryCount: Int = 3,
+        attemptCount: Int = 3,
         onSuccess: () -> Unit,
         onFinalFailure: (MeaError) -> Unit,
         postInitialize: () -> Unit = {}
     ): Cancellable {
-        Log.d(TAG, "register( retryCount = $retryCount )")
+        Log.d(TAG, "register( attemptCount = $attemptCount )")
 
         var cancelled = false
 
@@ -116,7 +116,7 @@ class RegistrationRetrier(
             })
         }
 
-        attemptToRegister(retryCount)
+        attemptToRegister(attemptCount)
 
         return Cancellable {
             Log.d(TAG, "cancel()")

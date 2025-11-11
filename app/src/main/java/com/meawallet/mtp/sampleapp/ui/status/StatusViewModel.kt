@@ -49,7 +49,7 @@ class StatusViewModel(
         value = false
     }
     private fun updateIsDefaultPaymentApp(context: Context) {
-        _isDefaultPaymentApp.setValue(tokenPlatform.isDefaultPaymentApplication(context))
+        _isDefaultPaymentApp.value = tokenPlatform.isDefaultPaymentApplication(context)
     }
     fun isDefaultPaymentApp(context: Context): LiveData<Boolean> {
         updateIsDefaultPaymentApp(context)
@@ -61,7 +61,7 @@ class StatusViewModel(
     }
     fun updateIsUserAuthenticated() {
         if (tokenPlatform.isInitialized()) {
-            _isUserAuthenticated.setValue(tokenPlatform.cdCvm.isCardholderAuthenticated())
+            _isUserAuthenticated.value = tokenPlatform.cdCvm.isCardholderAuthenticated()
         }
     }
     fun isUserAuthenticated(): LiveData<Boolean> {
