@@ -111,7 +111,6 @@ dependencies {
     implementation "androidx.biometric:biometric:${rootProject.ext.biometricVersion}"
     testImplementation "junit:junit:${rootProject.ext.junitVersion}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
-    testImplementation "org.mockito:mockito-inline:${rootProject.ext.mockitoInlineVersion}"
     testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
     androidTestImplementation "androidx.test.ext:junit:${rootProject.ext.extJunitVersion}"
     androidTestImplementation "androidx.test.espresso:espresso-core:${rootProject.ext.espressoCoreVersion}"

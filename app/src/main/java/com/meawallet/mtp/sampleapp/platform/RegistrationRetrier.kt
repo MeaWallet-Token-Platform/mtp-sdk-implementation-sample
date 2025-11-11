@@ -120,7 +120,7 @@ class RegistrationRetrier(
 
         return Cancellable {
             Log.d(TAG, "cancel()")
-            cancelled = true;
+            cancelled = true
         }
     }
 }
