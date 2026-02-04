@@ -12,7 +12,6 @@ import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 class ContactlessTransactionListener(
     private val context: Context,
     tokenPlatform: TokenPlatform
-
 ) : MeaContactlessTransactionListener {
 
     companion object {
@@ -22,15 +21,15 @@ class ContactlessTransactionListener(
     private val cardListenerEventHandler = CardListenerEventHandler(tokenPlatform)
 
     override fun onContactlessPaymentStarted(meaCard: MeaCard) {
-        Log.i(TAG,"onContactlessPaymentStarted(cardId = ${meaCard.id})")
-
+        Log.i(TAG, "onContactlessPaymentStarted(cardId = ${meaCard.id})")
         cardListenerEventHandler.handleOnTransactionStartedEvent(context, meaCard.id)
     }
 
     override fun onContactlessPaymentSubmitted(
-        meaCard: MeaCard, data: MeaContactlessTransactionData) {
-        Log.i(TAG,"onContactlessPaymentSubmitted(cardId = ${meaCard.id}, data = $data))")
-
+        meaCard: MeaCard,
+        data: MeaContactlessTransactionData
+    ) {
+        Log.i(TAG, "onContactlessPaymentSubmitted(cardId = ${meaCard.id}, data = $data)")
         cardListenerEventHandler.handleOnTransactionSubmittedEvent(context, meaCard.id, data)
     }
 
@@ -39,14 +38,15 @@ class ContactlessTransactionListener(
         error: MeaError,
         data: MeaContactlessTransactionData
     ) {
-        Log.e(TAG,"onContactlessPaymentFailure(cardId = ${meaCard.id})", Exception(error.message))
-
+        Log.e(TAG, "onContactlessPaymentFailure(cardId = ${meaCard.id})", Exception(error.message))
         cardListenerEventHandler.handleOnTransactionFailureEvent(context, meaCard.id, error, data)
     }
 
-    override fun onAuthenticationRequired(meaCard: MeaCard, data: MeaContactlessTransactionData) {
-        Log.i(TAG, "onAuthenticationRequired(cardId = ${meaCard.id}, data = ${data})")
-
+    override fun onAuthenticationRequired(
+        meaCard: MeaCard,
+        data: MeaContactlessTransactionData
+    ) {
+        Log.i(TAG, "onAuthenticationRequired(cardId = ${meaCard.id}, data = $data)")
         cardListenerEventHandler.handleOnAuthenticationRequiredEvent(context, meaCard.id, data)
     }
 }
