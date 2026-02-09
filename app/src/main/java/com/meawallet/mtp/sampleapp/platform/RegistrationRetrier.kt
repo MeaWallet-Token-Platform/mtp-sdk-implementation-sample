@@ -18,7 +18,6 @@ class RegistrationRetrier(
 ) {
     companion object {
         private val TAG: String = RegistrationRetrier::class.java.simpleName
-
     }
 
     /**
@@ -52,7 +51,7 @@ class RegistrationRetrier(
 
                 fun afterDelete(isDeleteOk: Boolean, error: MeaError?) {
                     if (!isDeleteOk) {
-                        Log.d(TAG, "Cleanup delete failed: $error")
+                        Log.i(TAG, "Cleanup delete failed: $error")
                         onAbort()
                         return
                     }
@@ -63,7 +62,7 @@ class RegistrationRetrier(
 
                         fun afterInit(isInitOk: Boolean, error: MeaError?) {
                             if (!isInitOk) {
-                                Log.d(TAG, "Initialization after the cleanup failed: $error")
+                                Log.i(TAG, "Initialization after the cleanup failed: $error")
                                 onAbort()
                                 return
                             }
@@ -71,7 +70,7 @@ class RegistrationRetrier(
                             try {
                                 postInitialize()
                             } catch (t: Throwable) {
-                                Log.d(TAG, "postInitialize() threw: $t")
+                                Log.i(TAG, "postInitialize() threw: $t")
                                 onAbort()
                                 return
                             }

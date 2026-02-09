@@ -11,9 +11,11 @@ class StatusViewModel(
 ) : ViewModel() {
 
     private val _sdkVersion = MutableLiveData<String>().apply {
-        value = "${tokenPlatform.configuration.versionName()}; " +
-                "${tokenPlatform.configuration.buildType()}; " +
-                tokenPlatform.configuration.cdCvmModel()
+        value = listOf(
+            tokenPlatform.configuration.versionName(),
+            tokenPlatform.configuration.buildType(),
+            tokenPlatform.configuration.cdCvmModel()
+        ).joinToString("; ")
     }
     val sdkVersion: LiveData<String> = _sdkVersion
 

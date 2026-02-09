@@ -525,7 +525,7 @@ class AddCardActivity : AppCompatActivity() {
         if (card.hasBackgroundImage()) {
             card.downloadBackgroundImage(this, tokenPlatform)
         } else {
-            Log.d(TAG,"This card (cardId = ${card.id}) doesn't have background image")
+            Log.i(TAG, "This card (cardId = ${card.id}) doesn't have background image")
         }
     }
 

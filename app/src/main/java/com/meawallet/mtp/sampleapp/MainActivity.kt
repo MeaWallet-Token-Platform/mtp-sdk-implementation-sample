@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
             },
             { error ->
                 Log.e(TAG,
-                    "Mea Token Platform library registration failed: ${error.code} " + error.message
+                    "Mea Token Platform library registration failed: ${error.code} ${error.message}"
                 )
             },
             {
