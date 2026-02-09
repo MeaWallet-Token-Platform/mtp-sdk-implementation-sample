@@ -126,10 +126,12 @@ class InitWithEncryptedPanFragment : DigitizationParamProviderFragment() {
     }
 
     private fun isEncryptedDataValid(data: EncryptedData?): Boolean {
-        return data?.encryptedCardData?.isNotEmpty() ?: false
-                && data?.publicKeyFingerprint?.isNotEmpty() ?: false
-                && data?.encryptedKey?.isNotEmpty() ?: false
-                && data?.iv?.isNotEmpty() ?: false
+        val d = data ?: return false
+
+        return d.encryptedCardData.isNotEmpty() &&
+                d.publicKeyFingerprint.isNotEmpty() &&
+                d.encryptedKey.isNotEmpty() &&
+                d.iv.isNotEmpty()
     }
 
     override fun isInputValid(): Boolean {
