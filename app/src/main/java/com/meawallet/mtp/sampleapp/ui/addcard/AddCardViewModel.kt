@@ -4,8 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.meawallet.mtp.*
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
-class AddCardViewModel : ViewModel() {
+class AddCardViewModel(
+    private val tokenPlatform: TokenPlatform
+) : ViewModel() {
 
     private var _prevDigitizationState: CardDigitizationActivityState? = null
     private val _digitizationState: MutableLiveData<CardDigitizationActivityState> =
@@ -21,29 +24,49 @@ class AddCardViewModel : ViewModel() {
     ) {
         setDigitizationState(CardDigitizationActivityState.InProgress)
 
-        MeaTokenPlatform.initializeDigitization(params, listener)
+        tokenPlatform.initializeDigitization(params, listener)
     }
 
-    fun completeDigitization(card: MeaCard, cvc2: String, listener: MeaCompleteDigitizationListener) {
+    fun completeDigitization(
+        card: MeaCard,
+        cvc2: String,
+        listener: MeaCompleteDigitizationListener) {
         setDigitizationState(CardDigitizationActivityState.InProgress)
 
-        MeaTokenPlatform.completeDigitization(card.eligibilityReceipt, card.termsAndConditionsAssetId, termsAnConditionsAcceptedTime, cvc2, listener)
+        tokenPlatform.completeDigitization(
+            card.eligibilityReceipt,
+            card.termsAndConditionsAssetId,
+            termsAnConditionsAcceptedTime,
+            cvc2,
+            listener)
     }
 
-    fun initializeAdditionalAuthentication(id: String, authMethodId: String, listener: MeaListener) {
+    fun initializeAdditionalAuthentication(
+        id: String,
+        authMethodId: String,
+        listener: MeaListener) {
         setDigitizationState(CardDigitizationActivityState.InProgress)
 
-        MeaTokenPlatform.initializeAdditionalAuthenticationForDigitization(id, authMethodId, listener)
+        tokenPlatform.initializeAdditionalAuthenticationForDigitization(
+            id,
+            authMethodId,
+            listener)
     }
 
-    fun completeAdditionalAuthentication(cardId: String, authenticationCode: String, listener: MeaCompleteAuthenticationListener) {
+    fun completeAdditionalAuthentication(
+        cardId: String,
+        authenticationCode: String,
+        listener: MeaCompleteAuthenticationListener) {
         setDigitizationState(CardDigitizationActivityState.InProgress)
 
-        MeaTokenPlatform.completeAdditionalAuthenticationForDigitization(cardId, authenticationCode, listener)
+        tokenPlatform.completeAdditionalAuthenticationForDigitization(
+            cardId,
+            authenticationCode,
+            listener)
     }
 
     fun getTermsAndConditions(termsAndConditionsAssetId: String, listener: MeaGetAssetListener) {
-        MeaTokenPlatform.getAsset(termsAndConditionsAssetId, listener)
+        tokenPlatform.getAsset(termsAndConditionsAssetId, listener)
     }
 
     fun setTermsAndConditionsAccepted(isAccepted: Boolean) {
@@ -61,7 +84,7 @@ class AddCardViewModel : ViewModel() {
 
     fun setDigitizationState(state: CardDigitizationActivityState) {
         _prevDigitizationState = _digitizationState.value
-        _digitizationState.setValue(state)
+        _digitizationState.value = state
     }
     fun getDigitizationState(): LiveData<CardDigitizationActivityState> {
         return _digitizationState
@@ -77,7 +100,6 @@ class AddCardViewModel : ViewModel() {
     }
 
     fun getCardByEligibilityReceipt(eligibilityReceipt: String): MeaCard? {
-        return MeaTokenPlatform.getCards().find { it.eligibilityReceipt == eligibilityReceipt }
+        return tokenPlatform.getCards().find { it.eligibilityReceipt == eligibilityReceipt }
     }
-
 }

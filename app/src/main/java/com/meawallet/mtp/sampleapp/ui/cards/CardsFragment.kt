@@ -11,9 +11,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.meawallet.mtp.*
 import com.meawallet.mtp.sampleapp.databinding.FragmentCardsBinding
-
+import com.meawallet.mtp.sampleapp.di.appContainer
 
 class CardsFragment : Fragment() {
+
+    companion object {
+        private val TAG = CardsFragment::class.java.simpleName
+    }
 
     private var _binding: FragmentCardsBinding? = null
 
@@ -23,9 +27,8 @@ class CardsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    companion object {
-        private val TAG = CardsFragment::class.java.simpleName
-    }
+    private val appContainer by lazy { requireContext().appContainer }
+    private val tokenPlatform by lazy { appContainer.tokenPlatform }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,14 +44,14 @@ class CardsFragment : Fragment() {
         val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(context)
         cardListRv.layoutManager = layoutManager
         cardListRv.itemAnimator = DefaultItemAnimator()
-        cardListRv.adapter = CardListAdapter()
+        cardListRv.adapter = CardListAdapter(tokenPlatform)
 
-        MeaTokenPlatform.setDigitizedCardStateChangeListener { card, _ ->
+        tokenPlatform.setDigitizedCardStateChangeListener { card, _ ->
             val adapter = cardListRv.adapter as CardListAdapter
             adapter.updateCard(card)
         }
 
-        MeaTokenPlatform.setCardReplenishListener(object : MeaCardReplenishListener {
+        tokenPlatform.setCardReplenishListener(object : MeaCardReplenishListener {
             override fun onReplenishCompleted(card: MeaCard, numberOfTokens: Int) {
                 Log.i(TAG,"onReplenishCompleted(). Card (cardId = ${card.id}) token count: $numberOfTokens Listener object: ${this.hashCode()}")
 
@@ -67,11 +70,11 @@ class CardsFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        if (!MeaTokenPlatform.isInitialized() || !MeaTokenPlatform.isRegistered()) {
+        if (!tokenPlatform.isInitialized() || !tokenPlatform.isRegistered()) {
             return
         }
 
-        val cards = MeaTokenPlatform.getCards()
+        val cards = tokenPlatform.getCards()
         if (cards.isNotEmpty()) {
             val adapter = cardListRv.adapter as CardListAdapter
             adapter.updateCards(cards)

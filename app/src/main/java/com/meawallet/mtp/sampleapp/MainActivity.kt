@@ -12,14 +12,13 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.meawallet.mtp.MeaError
-import com.meawallet.mtp.MeaListener
-import com.meawallet.mtp.MeaTokenPlatform
 import com.meawallet.mtp.sampleapp.databinding.ActivityMainBinding
+import com.meawallet.mtp.sampleapp.di.appContainer
 import com.meawallet.mtp.sampleapp.helpers.PushServiceInstanceManager
 
 
 import com.meawallet.mtp.sampleapp.listeners.PushServiceInstanceIdGetListener
+import com.meawallet.mtp.sampleapp.platform.RegistrationRetrier
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,6 +28,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityMainBinding
+
+    private val tokenPlatform by lazy { appContainer.tokenPlatform }
+    private val initializationHelper by lazy { appContainer.initializationHelper }
 
     private val navController by  lazy {  findNavController(R.id.nav_host_fragment_activity_main) }
 
@@ -79,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     private fun registerWallet() {
         Log.d(TAG, "registerWallet()")
 
-        if (MeaTokenPlatform.isRegistered()) {
+        if (tokenPlatform.isRegistered()) {
             Log.d(TAG, "Wallet already registered.")
             return
         }
@@ -98,20 +100,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun proceedWithRegister(token: String) {
+        val registrationRetrier = RegistrationRetrier(tokenPlatform)
 
-        MeaTokenPlatform.register(token, "en", object : MeaListener {
-            override fun onSuccess() {
+        registrationRetrier.register(
+            application,
+            token,
+            "en",
+            3,
+            {
                 Log.d(TAG,
                     "Mea Token Platform library successfully registered. $token"
                 )
-            }
-
-            override fun onFailure(error: MeaError) {
+            },
+            { error ->
                 Log.e(TAG,
-                    "Mea Token Platform library registration failed: ${error.code} " + error.message
+                    "Mea Token Platform library registration failed: ${error.code} ${error.message}"
                 )
+            },
+            {
+                initializationHelper.postInitializeSetup()
             }
-        })
+        )
     }
-
 }
