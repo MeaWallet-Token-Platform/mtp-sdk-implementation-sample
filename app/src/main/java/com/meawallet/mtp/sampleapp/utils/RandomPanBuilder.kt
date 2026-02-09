@@ -1,71 +1,79 @@
 package com.meawallet.mtp.sampleapp.utils
 
+import java.security.SecureRandom
 import java.util.Random
 
 object RandomPanBuilder {
+    val secureRnd = SecureRandom()
 
-    // Returns random PAN. Sometimes for VISA, sometimes for Mastercard.
+    /** Returns random PAN. Sometimes for VISA, sometimes for Mastercard. */
     fun getRandomPan(): String {
-        val maxTryCount = 100
         val rnd = Random()
         val randomNetwork = rnd.nextInt(2)
 
-        var generatedPan = "0000000000000000"
-
-        for (i in 1..maxTryCount) {
-            generatedPan =
-                when(randomNetwork) {
-                    0 -> generateRandomPanForMastercard()
-                    1 -> generateRandomPanForVisa()
-                    else -> generateRandomPanForMastercard()
-                }
-
-            if (isValidPan(generatedPan)) {
-                break
-            }
+        return when(randomNetwork) {
+            0 -> generateRandomPanForMastercard()
+            1 -> generateRandomPanForVisa()
+            else -> generateRandomPanForMastercard()
         }
-
-        return generatedPan
     }
 
     private fun generateRandomPanForMastercard(): String {
-        val rnd = Random()
-
-        val number1 = rnd.nextInt(500) + 5100 // first 2 digits between 51 and 55
-        val number2 = rnd.nextInt(9000) + 1000
-        val number3 = rnd.nextInt(9000) + 1000
-        val number4 = rnd.nextInt(9000) + 1000
-
-        return "$number1$number2$number3$number4"
+        return generateRandomPanWithPrefix("56000", 16)
     }
 
     private fun generateRandomPanForVisa(): String {
-        val rnd = Random()
-
-        val number3 = rnd.nextInt(9000) + 1000
-        val number4 = rnd.nextInt(9000) + 1000
-
-        return "40510693$number3$number4"
+        return generateRandomPanWithPrefix("40510693", 16)
     }
 
-    // Luhn test
-    // https://stackoverflow.com/questions/17684317/how-to-verify-pan-card
-    private fun isValidPan(number: String): Boolean {
-        var s1 = 0
-        var s2 = 0
-        val reverse = StringBuffer(number).reverse().toString()
-        for (i in reverse.indices) {
-            val digit = reverse[i].digitToIntOrNull() ?: -1
-            if (i % 2 == 0) { //this is for odd digits, they are 1-indexed in the algorithm
-                s1 += digit
-            } else { //add 2 * digit for 0-4, add 2 * digit - 9 for 5-9
-                s2 += 2 * digit
-                if (digit >= 5) {
-                    s2 -= 9
-                }
-            }
+    /**
+     * Generate a Luhn-valid number of exact [length], starting with [prefix].
+     * Example: prefix="414832", length=16 -> "414832XXXXXXXXXXXX" (Luhn valid)
+     */
+    private fun generateRandomPanWithPrefix(prefix: String, length: Int = 16): String {
+        require(length >= 2) { "length must be >= 2" }
+        require(prefix.all { it.isDigit() }) { "prefix must contain digits only" }
+        require(prefix.length < length) { "prefix must be shorter than length (need room for check digit)" }
+
+        // Build body: prefix + random digits, leaving 1 digit for the Luhn check digit
+        val bodyLen = length - 1
+        val sb = StringBuilder(bodyLen)
+        sb.append(prefix)
+
+        while (sb.length < bodyLen) {
+            sb.append(secureRnd.nextInt(10)) // 0..9
         }
-        return (s1 + s2) % 10 == 0
+
+        val checkDigit = computeCheckDigit(sb.toString())
+        return sb.append(checkDigit).toString()
+    }
+
+    /** Compute check digit for a number string that does NOT include the check digit yet */
+    private fun computeCheckDigit(withoutCheckDigit: String): Int {
+        // Append a '0' placeholder for check digit, compute sum, then adjust
+        val sum = luhnSum(withoutCheckDigit + "0")
+        return (10 - (sum % 10)) % 10
+    }
+
+    /**
+     * Luhn sum implementation:
+     * Starting from the rightmost digit, double every 2nd digit (i.e., digits in even positions from right),
+     * subtract 9 if result > 9, then sum all.
+     */
+    private fun luhnSum(digits: String): Int {
+        var sum = 0
+        var doubleIt = false
+
+        for (i in digits.length - 1 downTo 0) {
+            var d = digits[i].digitToInt()
+            if (doubleIt) {
+                d *= 2
+                if (d > 9) d -= 9
+            }
+            sum += d
+            doubleIt = !doubleIt
+        }
+        return sum
     }
 
 }
