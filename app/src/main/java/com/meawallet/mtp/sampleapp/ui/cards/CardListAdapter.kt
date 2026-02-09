@@ -180,7 +180,7 @@ class CardListAdapter(
                 card.id
             )
 
-            startActivity(cardIdTv.context, paymentIntent, null)
+            cardIdTv.context.startActivity(paymentIntent, null)
         }
 
         private fun openAddCardActivity(card: MeaCard) {
@@ -205,7 +205,7 @@ class CardListAdapter(
                 }
             }
 
-            startActivity(cardIdTv.context, completeDigitizationIntent, null)
+            cardIdTv.context.startActivity(completeDigitizationIntent)
         }
 
         private fun markForDeletion(card: MeaCard) {

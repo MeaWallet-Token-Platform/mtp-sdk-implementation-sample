@@ -5,6 +5,16 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+// TODO: Set the desired MTP SDK version. If possible, use the latest.
+def mtdSdkVersion = "4.3.12"
+
+// Environment usually is configured as build flavour.
+// For the sample purposes only the test environment is used.
+def env = "test"
+
+// TODO: Replace with your issuer name
+def issuer = "mea-simulator"
+
 android {
     namespace 'com.meawallet.mtp.sampleapp'
     compileSdk = rootProject.ext.compileSdkVersion
@@ -18,6 +28,8 @@ android {
         targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+
+        archivesBaseName = "sampleapp-${issuer}-${env}-${mtdSdkVersion}"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -75,17 +87,6 @@ configurations {
 // TODO: Configure MeaWallet repository in settings.gradle file
 
 dependencies {
-
-    // TODO: Set the desired MTP SDK version. If possible, use the latest.
-    def mtdSdkVersion = "4.3.12"
-
-    // Environment usually is configured as build flavour.
-    // For the sample purposes only the test environment is used.
-    def env = "test"
-
-    // TODO: Replace with your issuer name
-    def issuer = "mea-simulator"
-
     def artifactName = "mtp-${issuer}-${env}"
     def artifactHmsName = "mtp-${issuer}-hms-${env}"
 
