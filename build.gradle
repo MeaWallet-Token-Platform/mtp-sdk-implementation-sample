@@ -12,9 +12,9 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version '8.13.1' apply false  // use same version as agp_version
-    id 'com.android.library' version '8.13.1' apply false  // use same version as agp_version
-    id 'org.jetbrains.kotlin.android' version '2.2.21' apply false
+    id 'com.android.application' version '8.13.2' apply false  // use same version as agp_version
+    id 'com.android.library' version '8.13.2' apply false  // use same version as agp_version
+    id 'org.jetbrains.kotlin.android' version '2.3.10' apply false
 }
 
 ext {
@@ -23,8 +23,8 @@ ext {
     targetSdkVersion = 36
 
     coreKotlinVersion = "1.17.0"
-    archComponentsVersion = "2.9.4"
-    navigationVersion = "2.9.6"
+    archComponentsVersion = "2.10.0"
+    navigationVersion = "2.9.7"
     appcompatVersion = "1.7.1"
     materialVersion = "1.13.0"
     constraintLayoutVersion = "2.2.1"
@@ -34,7 +34,7 @@ ext {
 
     junitVersion = "4.13.2"
     extJunitVersion = "1.3.0"
-    mockitoCoreVersion = "5.20.0"
-    mockitoKotlinVersion = "6.1.0"
+    mockitoCoreVersion = "5.21.0"
+    mockitoKotlinVersion = "6.2.3"
     espressoCoreVersion = "3.7.0"
 }
