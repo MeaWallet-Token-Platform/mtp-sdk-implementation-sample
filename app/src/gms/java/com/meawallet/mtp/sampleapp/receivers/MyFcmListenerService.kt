@@ -11,9 +11,11 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.meawallet.mtp.*
 import com.meawallet.mtp.sampleapp.MainActivity
+import com.meawallet.mtp.sampleapp.di.appContainer
 import com.meawallet.mtp.sampleapp.helpers.NotificationHelper
 import com.meawallet.mtp.sampleapp.intents.INTENT_ACTION_TRANSACTION_PUSH
 import com.meawallet.mtp.sampleapp.intents.PaymentAppIntent
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
 class MyFcmListenerService : FirebaseMessagingService() {
     companion object {
@@ -29,6 +31,10 @@ class MyFcmListenerService : FirebaseMessagingService() {
 
     private lateinit var sNotificationHelper: NotificationHelper
 
+    private val tokenPlatform: TokenPlatform by lazy {
+        appContainer.tokenPlatform
+    }
+
     /**
      * Called if InstanceID token is updated. This may occur if the security of
      * the previous token had been compromised. Note that this is called when the InstanceID token
@@ -39,22 +45,22 @@ class MyFcmListenerService : FirebaseMessagingService() {
 
         sLastReceivedToken.postValue(newToken)
 
-        if (!MeaTokenPlatform.isInitialized()) {
-            MeaTokenPlatform.initialize(this)
+        if (!tokenPlatform.isInitialized()) {
+            tokenPlatform.initialize(this)
         }
 
-        if (!MeaTokenPlatform.isRegistered()) {
+        if (!tokenPlatform.isRegistered()) {
 
             return
         }
 
-        MeaTokenPlatform.updateDeviceInfo(newToken, null, object : MeaListener {
+        tokenPlatform.updateDeviceInfo(newToken, null, object : MeaListener {
             override fun onSuccess() {
-                Log.d(TAG, "onNewToken(): MeaTokenPlatform.updateDeviceInfo.onSuccess().")
+                Log.d(TAG, "onNewToken(): tokenPlatform.updateDeviceInfo.onSuccess().")
             }
 
             override fun onFailure(error: MeaError) {
-                Log.e(TAG, "onNewToken(): MeaTokenPlatform.updateDeviceInfo.onFailure(). ${error.code} : ${error.name}", Throwable(message = error.message))
+                Log.e(TAG, "onNewToken(): tokenPlatform.updateDeviceInfo.onFailure(). ${error.code} : ${error.name}", Throwable(message = error.message))
             }
         })
     }
@@ -65,13 +71,13 @@ class MyFcmListenerService : FirebaseMessagingService() {
 
         Log.d(TAG, "onMessageReceived(): from: ${message.from}, data: $messageData")
 
-        if (!MeaTokenPlatform.Rns.isMeaRemoteMessage(messageData)) {
+        if (!tokenPlatform.rns.isMeaRemoteMessage(messageData)) {
             return
         }
 
         try {
-            if (MeaTokenPlatform.Rns.isMeaTransactionMessage(messageData)) {
-                val transactionMessage = MeaTokenPlatform.Rns.parseTransactionMessage(messageData)
+            if (tokenPlatform.rns.isMeaTransactionMessage(messageData)) {
+                val transactionMessage = tokenPlatform.rns.parseTransactionMessage(messageData)
                 Log.d(TAG, "Transaction PUSH Message: $transactionMessage")
 
                 val authorizationStatus = transactionMessage?.authorizationStatus
@@ -106,7 +112,7 @@ class MyFcmListenerService : FirebaseMessagingService() {
 
             } else {
                 // Forward received remote message
-                MeaTokenPlatform.Rns.onMessageReceived(messageData)
+                tokenPlatform.rns.onMessageReceived(messageData)
                 Log.d(TAG, "onMessageReceived success.")
             }
         } catch (exception: MeaCheckedException) {

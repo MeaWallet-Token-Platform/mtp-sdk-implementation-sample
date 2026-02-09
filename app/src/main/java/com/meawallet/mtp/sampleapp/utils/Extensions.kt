@@ -9,6 +9,7 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import com.meawallet.mtp.*
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
 
 private const val TAG = "Extensions"
@@ -28,9 +29,9 @@ fun MeaCard.hasBackgroundImage(): Boolean {
     return false
 }
 
-fun MeaCard.downloadBackgroundImage(context: Context) {
+fun MeaCard.downloadBackgroundImage(context: Context, tokenPlatform: TokenPlatform) {
     this.productConfig?.cardBackgroundAssetId?.let { assetId ->
-        MeaTokenPlatform.getAsset(assetId, object: MeaGetAssetListener {
+        tokenPlatform.getAsset(assetId, object: MeaGetAssetListener {
 
             override fun onFailure(error: MeaError) {
                 Log.e(TAG,"Failed to retrieve asset id id = $assetId; error = $error")
@@ -73,9 +74,9 @@ fun MeaCard.isReadyForPayment(): Boolean {
             && this.transactionCredentialsCount!! > 0)
 }
 
-fun MeaCard.isSelectedForPayment(): Boolean {
+fun MeaCard.isSelectedForPayment(tokenPlatform: TokenPlatform): Boolean {
 
-    return this.id == MeaTokenPlatform.getCardSelectedForContactlessPayment()?.id
+    return this.id == tokenPlatform.getCardSelectedForContactlessPayment()?.id
 }
 
 fun AssetManager.readAssetsFile(fileName : String): String = open(fileName).bufferedReader().use{it.readText()}

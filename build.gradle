@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        agp_version = '8.13.0'
+        agp_version = '8.13.1'
     }
     dependencies {
         classpath 'com.google.gms:google-services:4.4.4'
@@ -12,9 +12,9 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version "$agp_version" apply false
-    id 'com.android.library' version "$agp_version" apply false
-    id 'org.jetbrains.kotlin.android' version '2.2.20' apply false
+    id 'com.android.application' version '8.13.1' apply false  // use same version as agp_version
+    id 'com.android.library' version '8.13.1' apply false  // use same version as agp_version
+    id 'org.jetbrains.kotlin.android' version '2.2.21' apply false
 }
 
 ext {
@@ -24,7 +24,7 @@ ext {
 
     coreKotlinVersion = "1.17.0"
     archComponentsVersion = "2.9.4"
-    navigationVersion = "2.9.5"
+    navigationVersion = "2.9.6"
     appcompatVersion = "1.7.1"
     materialVersion = "1.13.0"
     constraintLayoutVersion = "2.2.1"
@@ -34,5 +34,7 @@ ext {
 
     junitVersion = "4.13.2"
     extJunitVersion = "1.3.0"
+    mockitoCoreVersion = "5.20.0"
+    mockitoKotlinVersion = "6.1.0"
     espressoCoreVersion = "3.7.0"
 }

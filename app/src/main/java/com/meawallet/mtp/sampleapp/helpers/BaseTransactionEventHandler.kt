@@ -8,53 +8,55 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.meawallet.mtp.MeaContactlessTransactionData
 import com.meawallet.mtp.MeaError
-import com.meawallet.mtp.MeaTokenPlatform
 import com.meawallet.mtp.sampleapp.enums.EventSourceEnum
 import com.meawallet.mtp.sampleapp.enums.PaymentIntentActionsEnum
 import com.meawallet.mtp.sampleapp.intents.TransactionResultIntent
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 import com.meawallet.mtp.sampleapp.ui.payment.PaymentActivity
 import com.meawallet.mtp.sampleapp.utils.DeviceUtils
 
-abstract class BaseTransactionEventHandler : TransactionEventHandler {
+abstract class BaseTransactionEventHandler(
+    private val tokenPlatform: TokenPlatform
+) : TransactionEventHandler {
 
     abstract fun getEventSource(): EventSourceEnum
 
     companion object {
         private val TAG = BaseTransactionEventHandler::class.java.simpleName
+    }
 
-        private fun showLockScreenNotification(
-            context: Context?,
-            activityIntent: Intent,
-            notificationMessage: String
-        ): Boolean {
+    private fun showLockScreenNotification(
+        context: Context?,
+        activityIntent: Intent,
+        notificationMessage: String
+    ): Boolean {
 
-            if (context == null) {
-                Log.e(TAG, "showLockScreenNotification() failed, context is null")
-                return false
-            }
-
-            if (!MeaTokenPlatform.Configuration.isSaveAuthWhenLocked() && DeviceUtils.isDeviceLocked(
-                    context
-                )
-            ) {
-                val pendingIntent = PendingIntent.getActivity(
-                    context,
-                    0,
-                    activityIntent,
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-
-                val notificationHelper = NotificationHelper(context)
-                val notification: NotificationCompat.Builder =
-                    notificationHelper.getNotification(
-                        notificationMessage,
-                        pendingIntent
-                    )
-                notificationHelper.notify(0, notification)
-                return true
-            }
+        if (context == null) {
+            Log.e(TAG, "showLockScreenNotification() failed, context is null")
             return false
         }
+
+        if (!tokenPlatform.configuration.isSaveAuthWhenLocked() && DeviceUtils.isDeviceLocked(
+                context
+            )
+        ) {
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                activityIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val notificationHelper = NotificationHelper(context)
+            val notification: NotificationCompat.Builder =
+                notificationHelper.getNotification(
+                    notificationMessage,
+                    pendingIntent
+                )
+            notificationHelper.notify(0, notification)
+            return true
+        }
+        return false
     }
 
     override fun handleOnTransactionSubmittedEvent(
@@ -161,7 +163,7 @@ abstract class BaseTransactionEventHandler : TransactionEventHandler {
     override fun handleOnTransactionStartedEvent(context: Context, cardId: String) {
         Log.v(TAG, "handleOnTransactionStartedIntent(cardId = $cardId)")
 
-        if (!MeaTokenPlatform.Configuration.isSaveAuthWhenLocked()
+        if (!tokenPlatform.configuration.isSaveAuthWhenLocked()
             && DeviceUtils.isDeviceLocked(context)) {
 
             return

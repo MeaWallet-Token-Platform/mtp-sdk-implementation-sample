@@ -10,9 +10,12 @@ import androidx.lifecycle.MutableLiveData
 import com.huawei.hms.push.HmsMessageService
 import com.meawallet.mtp.*
 import com.meawallet.mtp.sampleapp.MainActivity
+import com.meawallet.mtp.sampleapp.di.appContainer
 import com.meawallet.mtp.sampleapp.helpers.NotificationHelper
 import com.meawallet.mtp.sampleapp.intents.INTENT_ACTION_TRANSACTION_PUSH
 import com.meawallet.mtp.sampleapp.intents.PaymentAppIntent
+import com.meawallet.mtp.sampleapp.platform.RegistrationRetrier
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
 class MyHmsListenerService : HmsMessageService() {
     companion object {
@@ -28,6 +31,11 @@ class MyHmsListenerService : HmsMessageService() {
 
     private lateinit var sNotificationHelper: NotificationHelper
 
+    private val tokenPlatform: TokenPlatform by lazy {
+        appContainer.tokenPlatform
+    }
+    private val initializationHelper by lazy { appContainer.initializationHelper }
+
     /**
      * Called if InstanceID token is updated. This may occur if the security of
      * the previous token had been compromised. Note that this is called when the InstanceID token
@@ -38,14 +46,14 @@ class MyHmsListenerService : HmsMessageService() {
 
         sLastReceivedToken.postValue(newToken)
 
-        if (!MeaTokenPlatform.isInitialized()) {
-            MeaTokenPlatform.initialize(this)
+        if (!tokenPlatform.isInitialized()) {
+            tokenPlatform.initialize(this)
         }
 
         // Devices with EMUI less than 10.0 can't receive ID token directly from getToken(). Instead
         // token is sent to onNewToken callback and has to be processed there.
         try {
-            if (!MeaTokenPlatform.isRegistered()) {
+            if (!tokenPlatform.isRegistered()) {
                 registerPlatform(newToken)
             } else {
                 updateDeviceInfo(newToken)
@@ -59,12 +67,12 @@ class MyHmsListenerService : HmsMessageService() {
 
         val messageData = message.dataOfMap
         Log.d(TAG, "onMessageReceived(): from: ${message.from}, data: $messageData")
-        if (!MeaTokenPlatform.Rns.isMeaRemoteMessage(messageData)) {
+        if (!tokenPlatform.rns.isMeaRemoteMessage(messageData)) {
             return
         }
         try {
-            if (MeaTokenPlatform.Rns.isMeaTransactionMessage(messageData)) {
-                val transactionMessage = MeaTokenPlatform.Rns.parseTransactionMessage(messageData)
+            if (tokenPlatform.rns.isMeaTransactionMessage(messageData)) {
+                val transactionMessage = tokenPlatform.rns.parseTransactionMessage(messageData)
                 Log.d(TAG, "Transaction PUSH Message: $transactionMessage")
                 val authorizationStatus = transactionMessage?.authorizationStatus
 
@@ -95,7 +103,7 @@ class MyHmsListenerService : HmsMessageService() {
 
             } else {
                 // Forward received remote message
-                MeaTokenPlatform.Rns.onMessageReceived(messageData)
+                tokenPlatform.rns.onMessageReceived(messageData)
                 Log.d(TAG, "onMessageReceived success.")
             }
         } catch (exception: MeaCheckedException) {
@@ -135,28 +143,42 @@ class MyHmsListenerService : HmsMessageService() {
     }
 
     private fun registerPlatform(token: String) {
+        Log.d(TAG, "Registering SDK from service's onNewToken() method.")
 
-        MeaTokenPlatform.register(token, "en", object : MeaListener {
-            override fun onSuccess() {
-                Log.d(TAG, "Mea Token Platform library successfully registered.")
-            }
+        val registrationRetrier = RegistrationRetrier(tokenPlatform)
 
-            override fun onFailure(error: MeaError) {
-                Log.e(TAG, "Mea Token Platform library registration failed. " + error.message)
+        registrationRetrier.register(
+            application,
+            token,
+            "en",
+            3,
+            {
+                Log.d(
+                    TAG,
+                    "Mea Token Platform library successfully registered. $token"
+                )
+            },
+            { error ->
+                Log.e(
+                    TAG,
+                    "Mea Token Platform library registration failed: ${error.code} " + error.message
+                )
+            },
+            {
+                initializationHelper.postInitializeSetup()
             }
-        })
+        )
     }
 
     private fun updateDeviceInfo(token: String) {
-        MeaTokenPlatform.updateDeviceInfo(token, null, object : MeaListener {
+        tokenPlatform.updateDeviceInfo(token, null, object : MeaListener {
             override fun onSuccess() {
-                Log.d(TAG, "onNewToken(): MeaTokenPlatform.updateDeviceInfo.onSuccess().")
+                Log.d(TAG, "onNewToken(): tokenPlatform.updateDeviceInfo.onSuccess().")
             }
 
             override fun onFailure(error: MeaError) {
-                Log.e(TAG, "onNewToken(): MeaTokenPlatform.updateDeviceInfo.onFailure().", Exception("${error.name} (${error.code}): ${error.message}"))
+                Log.e(TAG, "onNewToken(): tokenPlatform.updateDeviceInfo.onFailure().", Exception("${error.name} (${error.code}): ${error.message}"))
             }
         })
     }
-
 }
