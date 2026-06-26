@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -61,6 +60,10 @@ configurations {
     gmsReleaseImplementation {}
     hmsDebugImplementation {}
     hmsReleaseImplementation {}
+}
+
+base {
+    archivesName = "sampleapp-${issuer}-${env}-${mtdSdkVersion}"
 }
 
 // TODO: Configure MeaWallet repository in settings.gradle file
