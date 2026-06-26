@@ -29,8 +29,6 @@ android {
         versionCode 1
         versionName "1.0"
 
-        archivesBaseName = "sampleapp-${issuer}-${env}-${mtdSdkVersion}"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -82,6 +80,10 @@ configurations {
     gmsReleaseImplementation {}
     hmsDebugImplementation {}
     hmsReleaseImplementation {}
+}
+
+base {
+    archivesName = "sampleapp-${issuer}-${env}-${mtdSdkVersion}"
 }
 
 // TODO: Configure MeaWallet repository in settings.gradle file
