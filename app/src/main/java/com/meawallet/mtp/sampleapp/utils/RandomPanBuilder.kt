@@ -19,11 +19,11 @@ object RandomPanBuilder {
     }
 
     private fun generateRandomPanForMastercard(): String {
-        return generateRandomPanWithPrefix("56000", 16)
+        return generateRandomPanWithPrefix("500006", 16)
     }
 
     private fun generateRandomPanForVisa(): String {
-        return generateRandomPanWithPrefix("40510693", 16)
+        return generateRandomPanWithPrefix("400000", 16)
     }
 
     /**
