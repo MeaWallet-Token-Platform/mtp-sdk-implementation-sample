@@ -32,7 +32,7 @@ class PaymentViewModel(
     }
     fun updateIsUserAuthenticated(context: Context) {
         checkPlatformInitialized(context)
-        _isUserAuthenticated.setValue(tokenPlatform.StepUpAuth.isStepUpAuthenticated())
+        _isUserAuthenticated.value = tokenPlatform.stepUpAuth.isStepUpAuthenticated()
     }
     fun isUserAuthenticated(context: Context): LiveData<Boolean> {
         updateIsUserAuthenticated(context)

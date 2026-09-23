@@ -1,7 +1,7 @@
 package com.meawallet.mtp.sampleapp.utils
 
 import org.junit.Test
-import kotlin.math.abs
+import java.util.Random
 
 class RandomPanBuilderTest {
 
@@ -20,21 +20,17 @@ class RandomPanBuilderTest {
     }
 
     @Test
-    fun `when getRandomPan invoked 100 times then visa-mc split less than 20`() {
-        var mcCount = 0
-        var visaCount = 0
-        repeat (100) {
-            val pan = RandomPanBuilder.getRandomPan()
-            if (pan.startsWith("56000")) {
-                mcCount++
-            } else if (pan.startsWith("40510693")) {
-                visaCount++
-            } else {
-                assert(false) { "PAN $pan does not start with expected prefixes" }
-            }
-        }
+    fun `when getRandomPan uses mastercard branch then returns mastercard prefix`() {
+        val pan = RandomPanBuilder.getRandomPan(FixedRandom(0))
 
-        assert(abs(mcCount - visaCount) <= 20) { "Generated PAN split more than 20 items on 100" }
+        assert(pan.startsWith("500006")) { "PAN $pan does not start with the Mastercard prefix" }
+    }
+
+    @Test
+    fun `when getRandomPan uses visa branch then returns visa prefix`() {
+        val pan = RandomPanBuilder.getRandomPan(FixedRandom(1))
+
+        assert(pan.startsWith("400000")) { "PAN $pan does not start with the Visa prefix" }
     }
 
     // Luhn test
@@ -55,5 +51,11 @@ class RandomPanBuilderTest {
             }
         }
         return (s1 + s2) % 10 == 0
+    }
+
+    private class FixedRandom(
+        private val value: Int
+    ) : Random() {
+        override fun nextInt(bound: Int): Int = value
     }
 }

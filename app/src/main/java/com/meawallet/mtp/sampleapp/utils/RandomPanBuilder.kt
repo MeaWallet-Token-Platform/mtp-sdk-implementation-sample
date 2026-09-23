@@ -4,12 +4,13 @@ import java.security.SecureRandom
 import java.util.Random
 
 object RandomPanBuilder {
-    val secureRnd = SecureRandom()
+    private val secureRnd = SecureRandom()
 
     /** Returns random PAN. Sometimes for VISA, sometimes for Mastercard. */
-    fun getRandomPan(): String {
-        val rnd = Random()
-        val randomNetwork = rnd.nextInt(2)
+    fun getRandomPan(): String = getRandomPan(secureRnd)
+
+    internal fun getRandomPan(random: Random): String {
+        val randomNetwork = random.nextInt(2)
 
         return when(randomNetwork) {
             0 -> generateRandomPanForMastercard()

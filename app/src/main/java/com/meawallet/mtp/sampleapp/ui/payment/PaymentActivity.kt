@@ -513,7 +513,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
             //TODO Step Up Auth: Super important to add this line. It is the actual way of
             // informing SDK that authentication with the issuer app has succeeded
-            tokenPlatform.StepUpAuth.stepUpAuthenticated()
+            tokenPlatform.stepUpAuth.stepUpAuthenticated()
 
         } catch (exception: MeaCheckedException) {
             Log.e(TAG,"Failed to authenticate with device unlock.", exception)
