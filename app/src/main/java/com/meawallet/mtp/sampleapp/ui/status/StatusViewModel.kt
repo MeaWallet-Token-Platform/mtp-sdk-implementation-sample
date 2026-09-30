@@ -3,25 +3,29 @@ package com.meawallet.mtp.sampleapp.ui.status
 import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.*
-import com.meawallet.mtp.MeaTokenPlatform
 import com.meawallet.mtp.sampleapp.helpers.PushServiceInstanceManager
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
-class StatusViewModel : ViewModel() {
+class StatusViewModel(
+    private val tokenPlatform: TokenPlatform
+) : ViewModel() {
 
     private val _sdkVersion = MutableLiveData<String>().apply {
-        value = "${MeaTokenPlatform.Configuration.versionName()}; " +
-                "${MeaTokenPlatform.Configuration.buildType()}; " +
-                MeaTokenPlatform.Configuration.cdCvmModel()
+        value = listOf(
+            tokenPlatform.configuration.versionName(),
+            tokenPlatform.configuration.buildType(),
+            tokenPlatform.configuration.cdCvmModel()
+        ).joinToString("; ")
     }
     val sdkVersion: LiveData<String> = _sdkVersion
 
     private val _isInitialized = MutableLiveData<Boolean>().apply {
-        value = MeaTokenPlatform.isInitialized()
+        value = tokenPlatform.isInitialized()
     }
     val isInitialized: LiveData<Boolean> = _isInitialized
 
     private val _isRegistered = MutableLiveData<Boolean>().apply {
-        value = MeaTokenPlatform.isRegistered()
+        value = tokenPlatform.isRegistered()
     }
     val isRegistered: LiveData<Boolean> = _isRegistered
 
@@ -34,12 +38,12 @@ class StatusViewModel : ViewModel() {
     }
 
     private val _isSecureNfcSupported = MutableLiveData<Boolean>().apply {
-        value = MeaTokenPlatform.isSecureNfcSupported()
+        value = tokenPlatform.isSecureNfcSupported()
     }
     val isSecureNfcSupported: LiveData<Boolean> = _isSecureNfcSupported
 
     private val _isSecureNfcEnabled = MutableLiveData<Boolean>().apply {
-        value = MeaTokenPlatform.isSecureNfcEnabled()
+        value = tokenPlatform.isSecureNfcEnabled()
     }
     val isSecureNfcEnabled: LiveData<Boolean> = _isSecureNfcEnabled
 
@@ -47,7 +51,7 @@ class StatusViewModel : ViewModel() {
         value = false
     }
     private fun updateIsDefaultPaymentApp(context: Context) {
-        _isDefaultPaymentApp.setValue(MeaTokenPlatform.isDefaultPaymentApplication(context))
+        _isDefaultPaymentApp.value = tokenPlatform.isDefaultPaymentApplication(context)
     }
     fun isDefaultPaymentApp(context: Context): LiveData<Boolean> {
         updateIsDefaultPaymentApp(context)
@@ -58,8 +62,8 @@ class StatusViewModel : ViewModel() {
         value = false
     }
     fun updateIsUserAuthenticated() {
-        if (MeaTokenPlatform.isInitialized()) {
-            _isUserAuthenticated.setValue(MeaTokenPlatform.CdCvm.isCardholderAuthenticated())
+        if (tokenPlatform.isInitialized()) {
+            _isUserAuthenticated.value = tokenPlatform.cdCvm.isCardholderAuthenticated()
         }
     }
     fun isUserAuthenticated(): LiveData<Boolean> {
@@ -68,7 +72,7 @@ class StatusViewModel : ViewModel() {
     }
 
     fun setDefaultApplication(activity: Activity) {
-        MeaTokenPlatform.setDefaultPaymentApplication(activity, 420)
+        tokenPlatform.setDefaultPaymentApplication(activity, 420)
     }
 
 }

@@ -6,12 +6,15 @@ import com.meawallet.mtp.MeaContactlessTransactionData
 import com.meawallet.mtp.MeaError
 import com.meawallet.mtp.MeaTransactionReceiver
 import com.meawallet.mtp.sampleapp.helpers.TransactionReceiverEventHandler
+import com.meawallet.mtp.sampleapp.platform.TokenPlatform
 
-class TransactionReceiver : MeaTransactionReceiver() {
+class TransactionReceiver(tokenPlatform: TokenPlatform) : MeaTransactionReceiver() {
 
     companion object {
         private val TAG = TransactionReceiver::class.java.simpleName
     }
+
+    private val transactionReceiverEventHandler = TransactionReceiverEventHandler(tokenPlatform)
 
     override fun handleOnTransactionSubmittedIntent(
         context: Context?,
@@ -20,7 +23,7 @@ class TransactionReceiver : MeaTransactionReceiver() {
     ) {
         Log.d(TAG, "handleOnTransactionSubmittedIntent(cardId = $cardId, data = $data)")
 
-        TransactionReceiverEventHandler.handleOnTransactionSubmittedEvent(context, cardId, data)
+        transactionReceiverEventHandler.handleOnTransactionSubmittedEvent(context, cardId, data)
     }
 
     override fun handleOnTransactionFailureIntent(
@@ -31,7 +34,7 @@ class TransactionReceiver : MeaTransactionReceiver() {
     ) {
         Log.e(TAG, "handleOnTransactionFailureIntent(cardId = $cardId)", Exception(error?.message))
 
-        TransactionReceiverEventHandler.handleOnTransactionFailureEvent(context, cardId, error, data)
+        transactionReceiverEventHandler.handleOnTransactionFailureEvent(context, cardId, error, data)
     }
 
     override fun handleOnAuthenticationRequiredIntent(
@@ -41,12 +44,12 @@ class TransactionReceiver : MeaTransactionReceiver() {
     ) {
         Log.v(TAG, "handleOnAuthenticationRequiredIntent(cardId = $cardId, data = $data)")
 
-        TransactionReceiverEventHandler.handleOnAuthenticationRequiredEvent(context, cardId, data)
+        transactionReceiverEventHandler.handleOnAuthenticationRequiredEvent(context, cardId, data)
     }
 
     override fun handleOnTransactionStartedIntent(context: Context, cardId: String) {
         Log.v(TAG, "handleOnTransactionStartedIntent(cardId = $cardId)")
 
-        TransactionReceiverEventHandler.handleOnTransactionStartedEvent(context, cardId)
+        transactionReceiverEventHandler.handleOnTransactionStartedEvent(context, cardId)
     }
 }

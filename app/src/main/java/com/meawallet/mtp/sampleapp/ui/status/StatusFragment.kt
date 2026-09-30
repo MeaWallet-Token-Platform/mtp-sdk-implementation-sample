@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.google.android.material.button.MaterialButton
 import com.meawallet.mtp.sampleapp.databinding.FragmentStatusBinding
+import com.meawallet.mtp.sampleapp.di.appContainer
+import com.meawallet.mtp.sampleapp.ui.viewModelFactory
 
 class StatusFragment : Fragment() {
 
@@ -18,8 +20,12 @@ class StatusFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val statusViewModel by  lazy { ViewModelProvider(this)[StatusViewModel::class.java] }
-
+    private val appContainer by lazy { requireContext().appContainer }
+    private val statusViewModel by viewModels<StatusViewModel> {
+            viewModelFactory(StatusViewModel::class.java) {
+                StatusViewModel(appContainer.tokenPlatform)
+            }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

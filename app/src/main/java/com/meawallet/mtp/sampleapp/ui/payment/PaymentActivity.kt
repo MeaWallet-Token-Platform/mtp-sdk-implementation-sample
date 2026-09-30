@@ -3,8 +3,11 @@ package com.meawallet.mtp.sampleapp.ui.payment
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.app.KeyguardManager.KeyguardDismissCallback
+import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
+import android.nfc.NfcAdapter
+import android.nfc.cardemulation.CardEmulation
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +16,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -27,16 +31,22 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.meawallet.mtp.*
 import com.meawallet.mtp.sampleapp.R
+import com.meawallet.mtp.sampleapp.di.appContainer
 import com.meawallet.mtp.sampleapp.enums.PaymentIntentActionsEnum
 import com.meawallet.mtp.sampleapp.helpers.AlertDialogHelper
 import com.meawallet.mtp.sampleapp.helpers.ErrorHelper
-import com.meawallet.mtp.sampleapp.intents.*
+import com.meawallet.mtp.sampleapp.intents.INTENT_ACTION
+import com.meawallet.mtp.sampleapp.intents.INTENT_DATA_CARD_ID_KEY
+import com.meawallet.mtp.sampleapp.intents.INTENT_DATA_CONTACTLESS_TRANSACTION_DATA
+import com.meawallet.mtp.sampleapp.intents.INTENT_DATA_ERROR_CODE_KEY
+import com.meawallet.mtp.sampleapp.intents.TransactionResultIntent
 import com.meawallet.mtp.sampleapp.listeners.AlertDialogListener
+import com.meawallet.mtp.sampleapp.listeners.DismissAlertDialogListener
+import com.meawallet.mtp.sampleapp.ui.viewModelFactory
 import com.meawallet.mtp.sampleapp.ui.auth.AuthActivity
 import com.meawallet.mtp.sampleapp.utils.DeviceUtils
 import com.meawallet.mtp.sampleapp.utils.getBackgroundImage
 import java.util.concurrent.Executor
-
 
 class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
@@ -47,6 +57,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     }
 
     private var aheadOfTimeAuthentication = false
+    private var isPaymentAppConfigurationChecked = false
 
     private lateinit var executor: Executor
     private lateinit var biometricPrompt: BiometricPrompt
@@ -61,7 +72,12 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     private lateinit var paymentFailedIc: View
     private lateinit var paymentCompletedIc: View
 
-    private val paymentViewModel by lazy { ViewModelProvider(this)[PaymentViewModel::class.java] }
+    private val tokenPlatform by lazy { appContainer.tokenPlatform }
+    private val paymentViewModel by viewModels<PaymentViewModel> {
+        viewModelFactory(PaymentViewModel::class.java) {
+            PaymentViewModel(tokenPlatform)
+        }
+    }
 
     private var paymentActivityState: PaymentActivityState? = null
     private var cardInAction: MeaCard? = null
@@ -88,7 +104,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_process_payment)
 
-        MeaTokenPlatform.setAuthenticationListener(this)
+        tokenPlatform.setAuthenticationListener(this)
 
         inflateAndSetupViews()
 
@@ -150,10 +166,23 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     override fun onResume() {
         super.onResume()
 
-        MeaTokenPlatform.registerDeviceUnlockReceiver()
+        tokenPlatform.registerDeviceUnlockReceiver()
         paymentViewModel.updateIsUserAuthenticated(this)
 
         setOverLockScreenFlags(isOverLockScreenRequired)
+
+        if (!isPaymentAppConfigurationChecked) {
+            isPaymentAppConfigurationChecked = true
+
+            setAsPreferredPaymentMethod()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        // Clearing it in onPause() would cause too frequent warning pop-ups.
+        isPaymentAppConfigurationChecked = false
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -173,6 +202,11 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     }
 
     private fun inflateAndSetupViews() {
+        val isAuth = findViewById<TextView>(R.id.payment_user_authenticated)
+        paymentViewModel.isUserAuthenticated(this).observe(this) {
+            isAuth.text = it.toString()
+        }
+
         closeButton = findViewById(R.id.payment_close_button)
         closeButton.setOnClickListener {
             stopContactlessTransactionForSelectedCard()
@@ -189,7 +223,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         paymentCompletedIc = findViewById(R.id.payment_completed_ic)
     }
 
-    override fun onNewIntent(intent: Intent) {
+    override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
         handleIntent(intent)
@@ -235,6 +269,14 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         when (intentAction) {
             PaymentIntentActionsEnum.INTENT_ACTION_PAY_BY_CHOSEN_CARD -> {
 
+                // Stop the manual payment flow if the current payment app can't be configured
+                // to process it.
+                if (!checkPaymentAppConfigured()) {
+                    paymentViewModel.setPaymentState(PaymentActivityState.PaymentAppMisconfigured)
+
+                    return
+                }
+
                 processCardSelectedForPayment()
             }
 
@@ -259,9 +301,9 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
                         }
 
                         try {
-                            var selectedCard = MeaTokenPlatform.getCardSelectedForContactlessPayment()
+                            var selectedCard = tokenPlatform.getCardSelectedForContactlessPayment()
                             if (selectedCard == null || selectedCard.id != cardId) {
-                                selectedCard = MeaTokenPlatform.getDefaultCardForContactlessPayments()
+                                selectedCard = tokenPlatform.getDefaultCardForContactlessPayments()
                             }
 
                             if (selectedCard != null && selectedCard.id == cardId) {
@@ -340,7 +382,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         // If there is no valid user authentication, prompt authentication before the Tap
         // Applicable only if cardholder verification method is ALWAYS_CDCVM
         if (paymentViewModel.isUserAuthenticated(this).value != true
-            && MeaTokenPlatform.Configuration.cdCvmModel() == "ALWAYS_CDCVM") {
+            && tokenPlatform.configuration.cdCvmModel() == "ALWAYS_CDCVM") {
 
             authenticateCardholder(true)
         }
@@ -349,7 +391,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
     }
 
     private fun renderCardVisual(cardId: String) {
-        MeaTokenPlatform.getCardById(cardId)?.let { card ->
+        tokenPlatform.getCardById(cardId)?.let { card ->
             card.getBackgroundImage(this)?.apply {
                 cardView.foreground = this
             }
@@ -390,7 +432,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
     private fun getSelectedCard(): MeaCard? {
         try {
-            return MeaTokenPlatform.getCardSelectedForContactlessPayment()
+            return tokenPlatform.getCardSelectedForContactlessPayment()
         } catch (exception: MeaCheckedException) {
             ErrorHelper.handleMeaCheckedException(this, exception)
         }
@@ -458,7 +500,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         this.aheadOfTimeAuthentication = aheadOfTimeAuthentication
 
         try {
-            MeaTokenPlatform.requestCardholderAuthentication()
+            tokenPlatform.requestCardholderAuthentication()
         } catch (exception: MeaCheckedException) {
             ErrorHelper.handleMeaCheckedException(this, exception)
         }
@@ -471,7 +513,7 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
 
             //TODO Step Up Auth: Super important to add this line. It is the actual way of
             // informing SDK that authentication with the issuer app has succeeded
-            MeaTokenPlatform.StepUpAuth.stepUpAuthenticated()
+            tokenPlatform.stepUpAuth.stepUpAuthenticated()
 
         } catch (exception: MeaCheckedException) {
             Log.e(TAG,"Failed to authenticate with device unlock.", exception)
@@ -560,6 +602,81 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
         authUser.launch(startAuthIntent)
     }
 
+    private fun checkPaymentAppConfigured(): Boolean {
+        Log.d(TAG, "checkPaymentAppConfigured()")
+
+        if (tokenPlatform.isDefaultPaymentApplication(applicationContext)) {
+            return true
+        }
+
+        if (isForegroundPreferenceAllowed()) {
+            Log.w(TAG, "Foreground preference for payment category is allowed.")
+
+            return true
+        } else {
+            Log.w(TAG, "Foreground preference for payment category is not allowed.")
+
+            return false
+        }
+    }
+
+    private fun isForegroundPreferenceAllowed(): Boolean {
+        Log.d(TAG, "isForegroundPreferenceAllowed()")
+
+        val cardEmulation =
+            CardEmulation.getInstance(NfcAdapter.getDefaultAdapter(applicationContext))
+
+        return cardEmulation.categoryAllowsForegroundPreference(CardEmulation.CATEGORY_PAYMENT)
+    }
+
+    private fun configureForegroundService(): Boolean {
+        Log.d(TAG, "configureForegroundService()")
+
+        val cardEmulation =
+            CardEmulation.getInstance(NfcAdapter.getDefaultAdapter(applicationContext))
+        val paymentServiceComponent =
+            ComponentName(applicationContext, MeaHceService::class.java)
+
+        return cardEmulation
+            .setPreferredService(this@PaymentActivity, paymentServiceComponent)
+    }
+
+    private fun setAsPreferredPaymentMethod() {
+        Log.d(TAG, "setAsPreferredPaymentMethod()")
+
+        // If the default payment application is set, then no need to configure it again.
+        if (tokenPlatform.isDefaultPaymentApplication(applicationContext)) {
+            return
+        }
+
+        // Activity can't be configured to process payment if foreground preference is not allowed.
+        if (!isForegroundPreferenceAllowed()) {
+            paymentViewModel.setPaymentState(PaymentActivityState.PaymentAppMisconfigured)
+            showWarningPaymentWillNotBeProcessed()
+
+            return
+        }
+
+        if (!configureForegroundService()) {
+            Log.w(TAG, "setAsPreferredPaymentMethod() failed to configure.")
+            paymentViewModel.setPaymentState(PaymentActivityState.PaymentAppMisconfigured)
+            showWarningPaymentWillNotBeProcessed()
+        }
+    }
+
+    private fun showWarningPaymentWillNotBeProcessed() {
+        Log.w(TAG, "showWarningPaymentWillNotBeProcessed()")
+
+        AlertDialogHelper.showWarningDialog(this,
+            getString(R.string.payment_app_will_not_process_payment_alert),
+            object : AlertDialogListener, DismissAlertDialogListener {
+                override fun onDialogDismiss() {}
+
+                override fun onOkButtonClick() {
+                    tokenPlatform.setDefaultPaymentApplication(this@PaymentActivity, 1)
+                }
+            })
+    }
 
     override fun onFailure(error: MeaError) {
         Log.e(TAG,"MeaAuthenticationListener.onFailure()", Exception(error.message))
@@ -611,6 +728,14 @@ class PaymentActivity : AppCompatActivity(), MeaAuthenticationListener {
                 paymentProgress.visibility = View.INVISIBLE
 
                 paymentFailedIc.visibility = View.INVISIBLE
+                paymentCompletedIc.visibility = View.INVISIBLE
+            }
+            is PaymentActivityState.PaymentAppMisconfigured -> {
+                paymentInfoTv.text = getText(R.string.payment_app_will_not_process_payment)
+                closeButton.visibility = View.VISIBLE
+                paymentProgress.visibility = View.INVISIBLE
+
+                paymentFailedIc.visibility = View.VISIBLE
                 paymentCompletedIc.visibility = View.INVISIBLE
             }
             is PaymentActivityState.CardChosen -> {

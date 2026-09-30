@@ -10,20 +10,20 @@ object DeviceUtils {
     private val TAG = DeviceUtils::class.java.simpleName
 
     fun isDeviceLocked(context: Context): Boolean {
-        val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-        if (keyguardManager == null) {
-            Log.e(TAG, "Failed to check device lock screen status, keyguard manager is null")
-            return false
-        }
+        val keyguardManager = context.getSystemService(KeyguardManager::class.java)
+            ?: run {
+                Log.e(TAG, "Failed to check device lock screen status, KeyguardManager is null")
+                return false
+            }
         return keyguardManager.isKeyguardLocked
     }
 
     fun isDeviceSecure(context: Context): Boolean {
-        val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-        if (keyguardManager == null) {
-            Log.e(TAG, "Failed to check device lock screen status, keyguard manager is null")
-            return false
-        }
+        val keyguardManager = context.getSystemService(KeyguardManager::class.java)
+            ?: run {
+                Log.e(TAG, "Failed to check device lock security status, KeyguardManager is null")
+                return false
+            }
         return keyguardManager.isDeviceSecure
     }
 

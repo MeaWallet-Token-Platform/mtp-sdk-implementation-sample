@@ -35,6 +35,10 @@ object AlertDialogHelper {
         showMessageDialog(activity, R.string.alert_terms_conditions_title, message, android.R.color.holo_green_dark, listener)
     }
 
+    fun showWarningDialog(activity: Activity, message: String?, listener: AlertDialogListener?) {
+        showMessageDialog(activity, R.string.alert_warning_title, message, android.R.color.holo_purple, listener)
+    }
+
     fun showErrorMessageDialog(activity: Activity, message: String) {
         showErrorMessageDialog(activity, message, null, null)
     }
@@ -137,6 +141,7 @@ object AlertDialogHelper {
             builder.setPositiveButton(R.string.alert_ok) { _, _ -> listener?.onOkButtonClick() }
 
             if (listener is DismissAlertDialogListener) {
+                builder.setNeutralButton(R.string.alert_dismiss) { _, _ -> listener.onDialogDismiss() }
                 builder.setOnDismissListener { listener.onDialogDismiss() }
             }
 
