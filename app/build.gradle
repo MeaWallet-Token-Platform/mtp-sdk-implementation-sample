@@ -5,7 +5,7 @@ plugins {
 }
 
 // TODO: Set the desired MTP SDK version. If possible, use the latest.
-def mtdSdkVersion = "4.3.12"
+def mtdSdkVersion = "4.3.15"
 
 // Environment usually is configured as build flavour.
 // For the sample purposes only the test environment is used.
@@ -111,6 +111,7 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:${rootProject.ext.navigationVersion}"
     implementation "androidx.navigation:navigation-ui-ktx:${rootProject.ext.navigationVersion}"
     implementation "androidx.biometric:biometric:${rootProject.ext.biometricVersion}"
+    implementation "com.google.code.gson:gson:${rootProject.ext.gsonVersion}"
     testImplementation "junit:junit:${rootProject.ext.junitVersion}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
     testImplementation "org.mockito.kotlin:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
